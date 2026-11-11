@@ -150,6 +150,33 @@ def auto_correct_composed_palette(palette: dict[str, Any]) -> list[dict[str, str
             adjusted.append({"role": role, "from": palette[role], "to": replacement})
             palette[role] = replacement
     return adjusted
+
+
+def composed_text_recovery(palette: dict[str, Any], required: float = 7) -> dict[str, Any] | None:
+    """Return nearest darker light-text and lighter dark-text ground pairs for an unreadable composed palette."""
+    if not isinstance(palette, dict) or any(not _hex(palette.get(key)) for key in ("background", "surface", "text")):
+        return None
+    failures = [
+        {"role": role, "ground": palette[role], "ratio": contrast_ratio(palette["text"], palette[role])}
+        for role in ("background", "surface")
+        if contrast_ratio(palette["text"], palette[role]) < required
+    ]
+    if not failures:
+        return None
+
+    def nearest(ground: str, foreground: str, darker: bool) -> str | None:
+        hue, lightness, saturation = _hls(ground)
+        candidates = [_hex_hls(hue, step / 100, saturation) for step in range(101) if (step / 100 < lightness if darker else step / 100 > lightness)]
+        candidates.sort(key=lambda candidate: abs(_hls(candidate)[1] - lightness))
+        return next((candidate for candidate in candidates if contrast_ratio(foreground, candidate) >= required), None)
+
+    darker = {role: nearest(palette[role], palette["text"], True) for role in ("background", "surface")}
+    lighter = {role: nearest(palette[role], "#000000", False) for role in ("background", "surface")}
+    if not all(darker.values()) or not all(lighter.values()):
+        return None
+    darker_distance = sum(abs(_hls(darker[role])[1] - _hls(palette[role])[1]) for role in darker)
+    lighter_distance = sum(abs(_hls(lighter[role])[1] - _hls(palette[role])[1]) for role in lighter)
+    return {"failures": failures, "darker": darker, "lighter": lighter, "recommended": "darker" if darker_distance <= lighter_distance else "lighter"}
 def _status_color(hue_degrees: int, background: str, surface: str) -> str:
     _, background_lightness, _ = _hls(background)
     direction = -1 if background_lightness >= .5 else 1

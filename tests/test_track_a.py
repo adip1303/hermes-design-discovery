@@ -200,6 +200,26 @@ def test_composed_palette_legibility_errors_name_pair_ratio_and_move():
         assert "surface" in str(exc) and "lightness points" in str(exc) and "between" in str(exc)
 
 
+def test_unreadable_composed_text_refusal_names_pairs_and_offers_resendable_grounds():
+    moss = {"background":"#77754A","surface":"#868357","text":"#F7F4E9","muted":"#E3DEC7","border":"#96936A","border_strong":"#BBB78D","accent":"#D99A38","words":["warm","natural"]}
+    choices = composed_triplet()
+    choices[2] = composed_direction("Moss Watch", moss)
+    with isolated_plugin() as plugin:
+        refused = json.loads(generate(plugin, choices, expect_ok=False))
+        assert refused["ok"] is False and refused["error"] == "composed palette text cannot be made readable"
+        assert "Moss Watch: text #F7F4E9 on background #77754A is 4.31:1, needs 7:1" in refused["next"]
+        assert "text #F7F4E9 on surface #868357 is 3.53:1, needs 7:1" in refused["next"]
+        recovery = design_core.composed_text_recovery(moss)
+        assert recovery is not None
+        darker = recovery["darker"]
+        assert darker["background"] in refused["next"] and darker["surface"] in refused["next"]
+        assert contrast_ratio(moss["text"], darker["background"]) >= 7
+        retried = composed_triplet()
+        retried[2] = composed_direction("Moss Watch", {**moss, **darker})
+        accepted = json.loads(generate(plugin, retried))
+        assert accepted["ok"] is True
+
+
 def test_archetype_colors_remain_unchecked_and_composed_variety_is_noticeable():
     item = direction(accent=None); design_core.validate_direction(item)
     warm_white = composed_direction("Terracotta", COMPOSED)

@@ -4,7 +4,7 @@ import colorsys, json, os, re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from .contrast import report as contrast_report
-from .design_core import ADJUSTMENT_PATHS, DIMENSIONS, VOCABULARY, archetypes, auto_correct_composed_palette, catalog, color_variety_error, detect_conflicts, enums, filter_composed_words, fonts, resolve_direction, validate_adjustments, validate_direction
+from .design_core import ADJUSTMENT_PATHS, DIMENSIONS, VOCABULARY, archetypes, auto_correct_composed_palette, catalog, color_variety_error, composed_text_recovery, detect_conflicts, enums, filter_composed_words, fonts, resolve_direction, validate_adjustments, validate_direction
 from .state import append_tool_event, design_md_path, fresh_state, get_state, replace_state
 TYPOGRAPHY_VARIETY_ENABLED = True
 
@@ -540,6 +540,17 @@ def _refusal(exc):
         return json.dumps({"ok":False, "error":message, "next":"Use either an archetype color source or sources.color composed with one composed_palette, not both."}, ensure_ascii=False)
     next_step = "Call try with the direction the user chose, tell them the pane shows it, then apply the requested change." if message == "try a direction before changing an individual value" else message if message.startswith("Unknown direction reference") or message.startswith("No directions have been generated") or message == _NO_INTERVIEW else "Use one of these actions: try, approve_direction, lock, unlock, reject, clear_reject, adjust, add_constraint, or remove_constraint." if message == "unknown action" else _NEXT_CONFIRMATION if message == _CONFIRMATION_ERROR else _NEXT_QUOTED_CONSENT if message == "confirmation was suggested by the assistant" else "Ask whether they want the remaining dimensions kept as they are. If so, use approve_direction with their reply." if message == "this approval already locked another dimension" else "Summarize the final direction in a few plain sentences, ask the user to confirm, and wait." if message == "export confirmation must come after the final lock" else _NEXT_MISSING_UNDERSTANDING if message == "understanding confirmation is required" else _NEXT_AWAITING_UNDERSTANDING_REPLY if message == "understanding reply is required" else _NEXT_MISSING_UNDERSTANDING_CONFIRMATION if message == "understanding confirmation is missing" else _NEXT_CONFIRMATION_MISMATCH if message == "understanding confirmation did not match the latest user reply" else _NEXT_RENAME if message == "direction labels cannot use starting point names" else _NEXT_SHORT_DIRECTION_NAME if message == "direction labels must contain at most four words" else _NEXT_SIMILAR_COLORS if message == "directions are too similar in color" else _NEXT_ALREADY_LOCKED if message == "dimension is already locked" else _NEXT_ALREADY_UNLOCKED if message == "dimension is already unlocked" else _NEXT_ALREADY_SHOWN if message == "working direction is already shown" else "There is no adjustment to remove at that path. Tell the user the pane is unchanged and stop." if message == "no adjustment exists at path" else _NEXT_NO_CHANGE if message in {"nothing changed", "adjustment already matches the current token"} else _NEXT_MISSING_DESCRIBED_WORDS if message == "described color words must come from the user" else "Use source described with the user's exact color words, not source user." if message.startswith("That value wasn't given by the user") else "Use one of these adjustment paths: " + supported + ". color.accent_usage is set automatically for readability." if message.startswith("unsupported adjustment path") else "Use approve_direction for the selected direction, then export with the user's approval. Unlocked dimensions: " + message.split("unlocked: ", 1)[1] if message.startswith("all five dimensions must be locked; unlocked: ") else _NEXT_DESCRIBED_ACCENT_SOURCE if message == "color.accent must be a #RRGGBB hex value" else _NEXT_SHARED_ACCENT if message == "directions share this accent" else _NEXT_INVALID_ACCENT if message == "agent-sourced accent must be from the color source alternates" else _NEXT_UNSEEN if message == "dimension has not been seen since its last change" else _NEXT_UNEXPECTED_ARGUMENT if message.startswith("unexpected argument:") else _NEXT_ACCENT_CONTRAST if "accent" in message and "cannot reach" in message else "Correct this input before continuing: " + message
     return json.dumps({"ok":False, "error":message, "next":next_step}, ensure_ascii=False)
+
+
+def _composed_text_refusal(recoveries):
+    details = []
+    for label, recovery in recoveries:
+        pairs = "; ".join("text {text} on {role} {ground} is {ratio:.2f}:1, needs 7:1".format(text=recovery["text"], **failure) for failure in recovery["failures"])
+        darker, lighter = recovery["darker"], recovery["lighter"]
+        recommended = recovery["recommended"]
+        details.append(label + ": " + pairs + ". These mid-tone grounds cannot provide the required contrast with any text color. Keep the current light text and use background " + darker["background"] + " and surface " + darker["surface"] + ", or use dark text #000000 with background " + lighter["background"] + " and surface " + lighter["surface"] + ". The " + recommended + " option is closer to the original grounds.")
+    next_step = " ".join(details) + " Resend generate_directions with that change and keep the directions that passed unchanged."
+    return json.dumps({"ok":False, "error":"composed palette text cannot be made readable", "next":next_step}, ensure_ascii=False)
 def _activate(session_id):
     state = _clean(get_state(session_id))
     if not state.get("active"):
@@ -594,7 +605,7 @@ def generate_directions(args: dict, **kwargs) -> str:
                 direction["sources"] = {**direction["sources"], "color": "composed:" + direction["id"]}
             elif isinstance(direction, dict) and str(direction.get("sources", {}).get("color", "")).startswith("composed:"):
                 raise ValueError('Use sources.color "composed" for a composed palette. The plugin assigns the direction id.')
-        validation_errors, valid_directions = [], []
+        validation_errors, valid_directions, text_recoveries = [], [], []
         for direction in directions:
             if not isinstance(direction, dict) or _has_starting_point_name(direction.get("label", "")): raise ValueError("direction labels cannot use starting point names")
             if _has_long_direction_label(direction.get("label", "")): raise ValueError("direction labels must contain at most four words")
@@ -602,7 +613,18 @@ def generate_directions(args: dict, **kwargs) -> str:
             _lenient_voice(direction, warnings)
             _lenient_words(direction, warnings)
             if str(direction.get("sources", {}).get("color", "")).startswith("composed:"):
-                changes = auto_correct_composed_palette(direction.get("composed_palette", {}))
+                palette = direction.get("composed_palette", {})
+                try:
+                    changes = auto_correct_composed_palette(palette)
+                except ValueError as exc:
+                    if str(exc) != "composed palette text cannot be made readable":
+                        raise
+                    recovery = composed_text_recovery(palette)
+                    if recovery is None:
+                        raise
+                    recovery["text"] = palette["text"]
+                    text_recoveries.append((direction.get("label", "Unnamed direction"), recovery))
+                    continue
                 if changes:
                     direction["auto_adjusted"] = changes
             try:
@@ -612,6 +634,8 @@ def generate_directions(args: dict, **kwargs) -> str:
                 if not str(exc).startswith("composed palette "):
                     raise
                 validation_errors.append(direction.get("label", "Unnamed direction") + ": " + str(exc))
+        if text_recoveries:
+            return _composed_text_refusal(text_recoveries)
         variety_error = color_variety_error(valid_directions, typography_variety=TYPOGRAPHY_VARIETY_ENABLED) if len(valid_directions) > 1 else None
         if variety_error:
             return _result("Nothing was generated and the pane is unchanged. " + variety_error + " Resubmit generate_directions with these moves applied before replying.", generated=False, status="needs_changes", guidance=variety_error, warnings=warnings)
