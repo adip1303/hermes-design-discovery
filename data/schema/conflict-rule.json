@@ -1,0 +1,6 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object", "additionalProperties": false,
+  "required": ["id", "a", "b", "severity", "tradeoff", "resolution"],
+  "properties": { "id": { "type": "string", "pattern": "^[a-z0-9-]+$" }, "a": { "$ref": "../enums.json#/$defs/trait" }, "b": { "$ref": "../enums.json#/$defs/trait" }, "severity": { "$ref": "../enums.json#/$defs/conflict_severity" }, "tradeoff": { "type": "string", "minLength": 1 }, "resolution": { "type": "string", "minLength": 1 } }
+}

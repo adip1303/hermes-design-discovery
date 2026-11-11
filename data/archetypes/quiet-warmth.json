@@ -1,0 +1,17 @@
+{
+  "id": "quiet-warmth",
+  "name": "Quiet Warmth",
+  "summary": "Muted, earthy, sensory, adult. A calm, lightly tactile direction for considered products.",
+  "not": "Bright, playful, or high-energy.",
+  "traits": ["warm", "natural", "calm", "sensory", "spacious"],
+  "use_when": "Wellness, hospitality, journals, and thoughtful consumer products",
+  "avoid_when": "Dense operational dashboards or products that need an aggressively technical tone",
+  "internal_refs": ["Aesop"],
+  "design_notes": "Light upright serif for titles only. Warmth comes from earth tones, not cream.",
+  "typography": { "display_font": "cormorant-garamond", "body_font": "hanken-grotesk", "ui_font": null, "mono_font": null, "scale": "expressive", "weight_contrast": "inverted", "case": "sentence", "tracking_display": "0" },
+  "color": { "mode": "light", "background": "#E4DFD5", "surface": "#D6CDBE", "text": "#26211B", "muted": "#5C5246", "border": "#C6BBA9", "border_strong": "#837764", "accent": "#7A4A1E", "accent_text": "#F4EFE6", "accent_alternates": ["#4E5A3A"], "success": "#355C2B", "warning": "#8E3714", "danger": "#8B2A2A", "focus": "#26211B" },
+  "layout": { "density": "spacious" },
+  "geometry": { "radius": "soft", "border": "none", "elevation": "flat" },
+  "motion": { "preset": "smooth" },
+  "voice": { "tone": "Calm, understated, unhurried", "do": ["Gentle verbs", "Full sentences", "Quiet reassurance"], "dont": ["Urgency", "Jargon", "Hype"], "example": "Everything finished quietly." }
+}

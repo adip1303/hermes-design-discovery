@@ -1,0 +1,18 @@
+{
+  "id": "bright-friendly",
+  "name": "Bright Friendly",
+  "summary": "Saturated, rounded, skimmable, no jargon.",
+  "not": "Restrained or muted.",
+  "traits": ["playful", "bright", "approachable", "expressive"],
+  "use_when": "Consumer onboarding, coaching, and approachable everyday tools",
+  "avoid_when": "Sober, restrained, or high-stakes institutional products",
+  "internal_refs": ["Headspace"],
+  "design_notes": "Accent orange is fill only, always with dark text; never use it as text on white. Color lives in actions, not containers.",
+  "accent_usage": "fill_only",
+  "typography": { "display_font": "bricolage-grotesque", "body_font": "figtree", "ui_font": null, "mono_font": null, "scale": "expressive", "weight_contrast": "high", "case": "sentence", "tracking_display": "-0.02em" },
+  "color": { "mode": "light", "background": "#FFFFFF", "surface": "#FFFFFF", "text": "#1E1B3A", "muted": "#5B5878", "border": "#DDDBEA", "border_strong": "#8E8BA8", "accent": "#F26B1D", "accent_text": "#1E1B3A", "accent_alternates": ["#FFC43D", "#7FB2FF"], "success": "#1D7A44", "warning": "#A65200", "danger": "#C42B33", "focus": "#1E1B3A" },
+  "layout": { "density": "comfortable" },
+  "geometry": { "radius": "round", "border": "hairline", "elevation": "flat" },
+  "motion": { "preset": "springy" },
+  "voice": { "tone": "Casual, warm, encouraging, second person", "do": ["Plain words", "Short sentences", "Say you and your"], "dont": ["Jargon", "Metrics in headlines", "Exclamation marks"], "example": "Your agents had a good night." }
+}

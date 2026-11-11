@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object", "additionalProperties": false,
+  "required": ["id", "label", "rationale", "sources", "adjustments"],
+  "properties": {
+    "id": { "type": "string", "minLength": 1 }, "label": { "type": "string", "minLength": 1 }, "rationale": { "type": "string" },
+    "sources": { "type": "object", "additionalProperties": false, "required": ["typography", "color", "layout", "geometry", "motion"], "properties": { "typography": { "type": "string" }, "color": { "type": "string" }, "layout": { "type": "string" }, "geometry": { "type": "string" }, "motion": { "type": "string" } } },
+    "adjustments": { "type": "object", "additionalProperties": false, "properties": { "typography.display_font": { "$ref": "#/$defs/adjustment" }, "typography.body_font": { "$ref": "#/$defs/adjustment" }, "typography.scale": { "$ref": "#/$defs/adjustment" }, "typography.weight_contrast": { "$ref": "#/$defs/adjustment" }, "layout.density": { "$ref": "#/$defs/adjustment" }, "geometry.radius": { "$ref": "#/$defs/adjustment" }, "geometry.border": { "$ref": "#/$defs/adjustment" }, "geometry.elevation": { "$ref": "#/$defs/adjustment" }, "motion.preset": { "$ref": "#/$defs/adjustment" }, "color.accent": { "$ref": "#/$defs/adjustment" } } }
+  },
+  "$defs": { "adjustment": { "type": "object", "additionalProperties": false, "required": ["value", "source"], "properties": { "value": {}, "source": { "type": "string", "enum": ["agent", "user"] } } } }
+}

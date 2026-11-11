@@ -1,0 +1,218 @@
+{
+  "version": 1,
+  "notes": "Conflict rules fire on trait pairs across the traits of every source a direction draws from (archetype traits, and for composed palettes the traits of the vocabulary words they were composed from). severity tension = workable; clash = recommend choosing one side. Neither ever blocks. 'variants' are checked in order; the first whose 'when' matches replaces 'resolution'. Supported 'when' keys: user_accent (true when the accent was set by the user, source user or described), density (list of density ids of the working direction).",
+  "rules": [
+    {
+      "id": "cold-vs-warm",
+      "a": "cold",
+      "b": "warm",
+      "severity": "tension",
+      "tradeoff": "Cold reads as capable and exact; warm reads as human. Mixed evenly, it feels undecided.",
+      "resolution": "Pick one as the base. Let the other appear only in the accent color and the tone of the copy."
+    },
+    {
+      "id": "dense-vs-spacious",
+      "a": "dense",
+      "b": "spacious",
+      "severity": "tension",
+      "tradeoff": "Density shows everything at once; space makes each thing feel important. You can't have both on the same screen.",
+      "resolution": "Use density for data views and space for summaries and empty states. Never both in one panel."
+    },
+    {
+      "id": "playful-vs-institutional",
+      "a": "playful",
+      "b": "institutional",
+      "severity": "clash",
+      "tradeoff": "Playfulness signals low stakes; institutional design signals that mistakes matter. People trust one or the other.",
+      "resolution": "Choose based on what happens if the user makes an error. If it's serious, drop the playfulness."
+    },
+    {
+      "id": "playful-vs-premium",
+      "a": "playful",
+      "b": "premium",
+      "severity": "tension",
+      "tradeoff": "Premium relies on restraint; playfulness relies on surprise. Too much of either cancels the other.",
+      "resolution": "Keep the premium base. Allow one playful moment, such as a single animation or illustration, and nowhere else."
+    },
+    {
+      "id": "bright-vs-sober",
+      "a": "bright",
+      "b": "sober",
+      "severity": "clash",
+      "tradeoff": "Saturated color asks for attention; sober design earns trust by not asking.",
+      "resolution": "Keep the sober palette. Use the bright color only for the primary action."
+    },
+    {
+      "id": "expressive-vs-minimal",
+      "a": "expressive",
+      "b": "minimal",
+      "severity": "tension",
+      "tradeoff": "Expressive design adds character through decoration; minimal design removes everything that isn't needed.",
+      "resolution": "Let typography carry the expression. Keep color, borders, and shapes minimal.",
+      "variants": [
+        {
+          "when": { "user_accent": true },
+          "resolution": "Let the accent color carry the expression, since it was the user's choice. Keep type, borders, and shapes minimal."
+        }
+      ]
+    },
+    {
+      "id": "editorial-vs-dense",
+      "a": "editorial",
+      "b": "dense",
+      "severity": "tension",
+      "tradeoff": "Editorial layouts are built for reading one thing well; dense layouts are built for scanning many things.",
+      "resolution": "Use editorial type and measure for long text, and a compact table for data. Keep them in separate sections."
+    },
+    {
+      "id": "literary-vs-technical",
+      "a": "literary",
+      "b": "technical",
+      "severity": "tension",
+      "tradeoff": "Literary type slows the reader down; technical interfaces want them to move fast.",
+      "resolution": "Use the literary face for headings and prose only. Use a neutral sans for numbers, labels, and controls."
+    },
+    {
+      "id": "stark-vs-approachable",
+      "a": "stark",
+      "b": "approachable",
+      "severity": "clash",
+      "tradeoff": "Stark design creates distance on purpose; approachable design removes it.",
+      "resolution": "Decide who the audience is. If it's a general audience, drop the starkness."
+    },
+    {
+      "id": "avant-garde-vs-institutional",
+      "a": "avant-garde",
+      "b": "institutional",
+      "severity": "clash",
+      "tradeoff": "Experimental layouts make people work to understand; institutional design must never make them work.",
+      "resolution": "Keep the institutional structure. Express the experimental side only in imagery or a single display typeface."
+    },
+    {
+      "id": "rugged-vs-premium",
+      "a": "rugged",
+      "b": "premium",
+      "severity": "tension",
+      "tradeoff": "Rugged reads as built for use; premium reads as built to be admired.",
+      "resolution": "Keep rugged materials and functional layout, with premium spacing and type."
+    },
+    {
+      "id": "industrial-vs-calm",
+      "a": "industrial",
+      "b": "calm",
+      "severity": "tension",
+      "tradeoff": "Industrial design shows its mechanics; calm design hides them.",
+      "resolution": "Keep the industrial grid and labeling, and soften color and motion."
+    },
+    {
+      "id": "mechanical-vs-emotive",
+      "a": "mechanical",
+      "b": "emotive",
+      "severity": "tension",
+      "tradeoff": "Mechanical motion is precise and immediate; emotive motion has weight and feeling.",
+      "resolution": "Choose one motion character for the whole product. Don't mix snappy and springy."
+    },
+    {
+      "id": "graphic-vs-literary",
+      "a": "graphic",
+      "b": "literary",
+      "severity": "tension",
+      "tradeoff": "Graphic design leads with shapes and contrast; literary design leads with words.",
+      "resolution": "Pick which leads on each page: a graphic opener, then literary body, never both competing."
+    },
+    {
+      "id": "sensory-vs-functional",
+      "a": "sensory",
+      "b": "functional",
+      "severity": "tension",
+      "tradeoff": "Sensory design invites lingering; functional design gets you out fast.",
+      "resolution": "Put sensory moments on entry and summary screens. Keep task screens functional."
+    },
+    {
+      "id": "precise-vs-natural",
+      "a": "precise",
+      "b": "natural",
+      "severity": "tension",
+      "tradeoff": "Precision implies exact grids and hard edges; natural implies irregular, organic forms.",
+      "resolution": "Keep a precise grid and tight corners. Let the natural side come through color only."
+    },
+    {
+      "id": "dense-vs-calm",
+      "a": "dense",
+      "b": "calm",
+      "severity": "tension",
+      "tradeoff": "Calm needs room; density removes it.",
+      "resolution": "Keep the dense layout for lists and tables. Make it calm through quiet color, few borders, and no motion beyond state changes.",
+      "variants": [
+        {
+          "when": { "density": ["comfortable", "spacious", "reading"] },
+          "resolution": "Keep the roomy layout. Put the items people check most at the top so nothing important needs scrolling."
+        }
+      ]
+    },
+    {
+      "id": "bright-vs-cold",
+      "a": "bright",
+      "b": "cold",
+      "severity": "tension",
+      "tradeoff": "Bright color warms a cold system and can make it look like two products.",
+      "resolution": "Limit bright color to the primary action."
+    },
+    {
+      "id": "stark-vs-playful",
+      "a": "stark",
+      "b": "playful",
+      "severity": "clash",
+      "tradeoff": "Stark design is deliberately serious; playfulness undercuts it at every turn.",
+      "resolution": "Choose one. If you need both, keep stark structure and limit play to a single illustration or animation."
+    },
+    {
+      "id": "avant-garde-vs-approachable",
+      "a": "avant-garde",
+      "b": "approachable",
+      "severity": "tension",
+      "tradeoff": "Experimental layouts reward effort; approachable design asks for none.",
+      "resolution": "Keep navigation and controls conventional. Let the experimental side live in headlines and imagery."
+    },
+    {
+      "id": "rugged-vs-sensory",
+      "a": "rugged",
+      "b": "sensory",
+      "severity": "tension",
+      "tradeoff": "Rugged design is about durability and use; sensory design is about texture and feeling.",
+      "resolution": "Lead with the functional layout. Use sensory color and imagery on summary screens only."
+    },
+    {
+      "id": "emotive-vs-functional",
+      "a": "emotive",
+      "b": "functional",
+      "severity": "tension",
+      "tradeoff": "Emotive design asks people to feel something; functional design asks them to finish something.",
+      "resolution": "Keep task flows functional. Put emotive moments before and after the task, never during it."
+    },
+    {
+      "id": "graphic-vs-calm",
+      "a": "graphic",
+      "b": "calm",
+      "severity": "tension",
+      "tradeoff": "Bold graphic shapes demand attention; calm design lets attention rest.",
+      "resolution": "Use one bold graphic element per screen and keep the rest quiet."
+    },
+    {
+      "id": "stark-vs-warm",
+      "a": "stark",
+      "b": "warm",
+      "severity": "tension",
+      "tradeoff": "Stark contrast keeps people at a distance; warmth invites them in.",
+      "resolution": "Keep the stark type and layout, and bring warmth in through color temperature only."
+    },
+    {
+      "id": "expressive-vs-sober",
+      "a": "expressive",
+      "b": "sober",
+      "severity": "clash",
+      "tradeoff": "Expressive design is meant to be noticed; sober design is meant to disappear behind the task.",
+      "resolution": "Keep the sober base. Express character only in the display typeface."
+    }
+  ]
+}

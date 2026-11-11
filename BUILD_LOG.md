@@ -1,0 +1,75 @@
+# Build log
+
+## Commands run
+
+- `rg --files docs\hermes-docs` and `Get-Content -Raw` on the requested plugin guides and `docs\desktop-sdk-source\sessions.ts`.
+- `rg -n` searches for hook, context-injection, state, REST, and session/composer SDK contracts.
+- `hermes plugins validate . --install-deps` — first run failed at capability probe: `No module named 'state'`; fixed the plugin-root import path.
+- `hermes plugins validate . --install-deps` — passed; full output was reported in the chat.
+- `& .\sync-plugin.ps1` — mirrored the plugin, copied `desktop\plugin.js`, and enabled `design-discovery`.
+- `git diff --check; git status --short` — no whitespace errors; identified validator-created bytecode.
+- `Get-ChildItem -LiteralPath .\__pycache__ -Force` — confirmed only `__init__.cpython-314.pyc` and `state.cpython-314.pyc` existed.
+- `Remove-Item -LiteralPath 'C:\Users\adhip\dev\hermes-design-plugin\__pycache__' -Recurse -Force` — removed validator-created bytecode.
+- `& .\sync-plugin.ps1` — re-synced final files; plugin was already enabled.
+- `rg`/`Get-Content` searches over Desktop SDK source and documentation to diagnose the missing pane and inspect `host.revealPane`, `host.openWorkspace`, runtime loader limits, and `.hermes-package.json` behavior.
+- `hermes plugins validate . --install-deps` — passed after adding pane reveal, palette, and sidebar contributions.
+- `Remove-Item -LiteralPath 'C:\Users\adhip\dev\hermes-design-plugin\__pycache__' -Recurse -Force` — removes validator-created bytecode before sync.
+- `& .\sync-plugin.ps1` — syncs the auto-opening pane update and keeps the plugin enabled.
+- `rg`/`Get-Content` searches over SDK pane lifecycle and install behavior — confirmed that closing a plugin's only pane disables it, while multiple panes preserve commands and middleware.
+- `hermes plugins validate . --install-deps` — passed after adding the floating launcher pane and one-time reveal preference.
+- `Remove-Item -LiteralPath 'C:\Users\adhip\dev\hermes-design-plugin\__pycache__' -Recurse -Force` — removes validator-created bytecode before sync, when present.
+- `& .\sync-plugin.ps1` — syncs the multi-pane lifecycle fix and keeps the plugin enabled.
+- `Get-Content`/`rg` inspection of launcher placement and state; attempted live Hermes UI inspection was not approved by the app bridge.
+- Public Google Fonts CSS and WOFF2 probes fetched for the temporary rendering test.
+- `Get-Content`/`git diff --check` inspection of the launcher, state hook, README, and rendering test before final validation.
+- `hermes plugins validate . --install-deps` — passed; its only diagnostic was the expected host-isolation note for the buffered dashboard API.
+- `Remove-Item -LiteralPath .\__pycache__ -Recurse -Force` — removed validator-created Python bytecode.
+- `git diff --check; git status --short` — no whitespace errors before sync and commit.
+- `& .\sync-plugin.ps1` — mirrored the plugin and desktop entrypoint, preserving its enabled state.
+- `python tests\smoke_tools.py` — required before every sync; registers the plugin with a recording context and invokes every tool through Hermes-style keyword dispatch plus the pre-LLM hook.
+- `C:\Users\adhip\AppData\Local\hermes\tools\python-3.14.9+20261021-win32-x64\python.exe tests\smoke_tools.py` — passed (`smoke_tools: passed`) using Hermes' bundled runtime.
+- `sync-plugin.ps1` now resolves the real user-local Hermes directory rather than the workspace sandbox's redirected `LOCALAPPDATA` value.
+- `& .\sync-plugin.ps1` — smoke test passed and copied the handler fix into the real Hermes plugin directory.
+- `git diff --no-index -- __init__.py C:\Users\adhip\AppData\Local\hermes\plugins\design-discovery\__init__.py` — confirmed the installed and repository handlers match after sync.
+- `hermes plugins validate . --install-deps` — passed; host-isolation buffered-dashboard note only.
+- `rg`/`Get-Content` inspection of plugin lifecycle, public API, desktop route mounting, and CLI help — confirmed that copied Python stays in memory until a gateway restart; installed bytecode can also survive timestamp-preserving copies.
+- `hermes plugins --help`, `hermes plugins enable --help`, `hermes gateway --help`, `hermes gateway restart --help`, and `hermes serve --help` — inspected only; no service action was run.
+- `hermes gateway restart` was attempted after explicit confirmation; it stopped the gateway then failed because this machine has no installed gateway service. Sync no longer offers or runs a restart.
+- `C:\Users\adhip\AppData\Local\hermes\tools\python-3.14.9+20261021-win32-x64\python.exe tests\smoke_tools.py` — passed after adding the build/loaded-stamp contract.
+- `& .\sync-plugin.ps1` — smoke test passed, purged installed `__pycache__`, wrote an installed-only dirty build stamp, and made no restart attempt.
+- `hermes plugins validate . --install-deps` — passed; the only diagnostic was the expected host-isolation note for the buffered dashboard API.
+- Inspected installed `.build-stamp.json` bytes and reader — found an `EF BB BF` UTF-8 BOM; the prior `utf-8` reader swallowed the resulting JSON decode error.
+- `tests\smoke_tools.py` — passed with a `utf-8-sig` BOM fixture.
+- `& .\sync-plugin.ps1` — wrote a BOM-free installed stamp; first bytes verified as `7B 22 64`.
+- `hermes plugins validate . --install-deps` — passed; expected host-isolation buffered-dashboard diagnostic only.
+- Track A decision: DesignState includes `session_id`; `pre_llm_call` will inject only when both `active` is true and that id matches the current session.
+- Track A decision: the first `generate_directions` call binds one active session; a call from another session resets DesignState before saving its directions.
+- Track A: `pytest` is not installed in Hermes' bundled Python (`No module named pytest`); `tests/test_track_a.py` remains pytest-compatible and `tests/run_track_a.py` provides a stdlib fallback runner.
+- Track A local checks use the stdlib fallback, smoke test, data validator, and `hermes plugins validate .` without dependency installation.
+- Tool dispatch follows `handler(args: dict, **kwargs)` and uses injected `session_id` for the same identity as `pre_llm_call`; `smoke_tools.py` simulates that dispatch, while live Hermes testing remains the real gate.
+- Added the approved `ui_font` and required `voice` data contract, four voice records, four Google Fonts metadata entries, and the Editorial and Bright Friendly archetypes; direction resolution takes voice from its typography source.
+- Added `accent_usage`: it defaults to `text_and_fill`; Bright Friendly is `fill_only`, so its orange accent is checked as a 3:1 non-text fill and DESIGN.md explicitly prohibits accent-colored text.
+- `tests/smoke_tools.py`, `tests/run_track_a.py`, `scripts/validate_data.py`, and `hermes plugins validate .` — passed before commit; validation emitted the expected host-isolation buffered-dashboard note only.
+- Replaced direction and working-state overrides with path-keyed, source-tagged adjustments; added agent/user accent rules, source-category font alternatives, enforceable constraints, resolved-token provenance, safe catalog output, and deterministic user decisions in DESIGN.md.
+- `tests/smoke_tools.py`, `tests/run_track_a.py`, `scripts/validate_data.py`, and `hermes plugins validate .` — passed for the adjustments/constraints change; validation emitted the expected host-isolation buffered-dashboard note only.
+- Added compatibility migration from persisted direction `overrides` to agent-sourced `adjustments`, so existing active sessions continue to load after the state contract change.
+- Replaced `skills/design-discovery/SKILL.md` from the approved draft and reconciled its tool references with the registered API; only documentation changed.
+- Added server-side interview, user-provenance, and explicit-confirmation guards. `pre_llm_call` stores the last 50 documented `user_message` values only for the active matching session; tool handlers enforce against that durable record.
+- Added a process-memory-only, per-session ten-message pre-activation buffer. It is copied into durable design state only when that same session activates; unrelated chats are never written to disk.
+- Merged the current design-discovery skill draft while retaining registered tool names and guarded parameter shapes, including `confirmed_by_user` for lock, reject, add_constraint, and export.
+- Added the safe font library to `get_state` catalog output and worked tool examples so the agent need not inspect plugin files for the design vocabulary or call shapes.
+- Enforced exactly three generated directions and added passing and refusal coverage for the requirement.
+- Added a declared `pre_tool_call` hook that blocks common shell and file-writing/editing tools only during an active, non-final design session; design-discovery tools and final sessions remain unblocked.
+
+## Files created
+
+- `plugin.yaml`
+- `__init__.py`
+- `state.py`
+- `dashboard/manifest.json`
+- `dashboard/plugin_api.py`
+- `desktop/plugin.js`
+- `skills/design-discovery/SKILL.md`
+- `sync-plugin.ps1`
+- `README.md`
+- `tests/smoke_tools.py`

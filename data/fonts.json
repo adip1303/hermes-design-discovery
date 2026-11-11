@@ -1,0 +1,849 @@
+[
+  {
+    "id": "inter",
+    "family": "Inter",
+    "category": "sans",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "system-ui, -apple-system, Segoe UI, sans-serif",
+    "tags": [
+      "neutral",
+      "technical",
+      "ui"
+    ],
+    "source": "google/fonts METADATA.pb",
+    "class": "neo-grotesk"
+  },
+  {
+    "id": "fraunces",
+    "family": "Fraunces",
+    "category": "serif",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "Georgia, Times New Roman, serif",
+    "tags": [
+      "editorial",
+      "warm",
+      "expressive"
+    ],
+    "source": "google/fonts METADATA.pb",
+    "class": "soft-serif"
+  },
+  {
+    "id": "jetbrains-mono",
+    "family": "JetBrains Mono",
+    "category": "mono",
+    "roles": [
+      "mono"
+    ],
+    "weights": [
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "ui-monospace, SFMono-Regular, Consolas, monospace",
+    "tags": [
+      "technical",
+      "code",
+      "structured"
+    ],
+    "source": "google/fonts METADATA.pb",
+    "class": "monospace"
+  },
+  {
+    "id": "ibm-plex-sans",
+    "family": "IBM Plex Sans",
+    "category": "sans",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "system-ui, sans-serif",
+    "tags": [
+      "technical",
+      "ui"
+    ],
+    "source": "google/fonts METADATA.pb",
+    "class": "neo-grotesk"
+  },
+  {
+    "id": "ibm-plex-mono",
+    "family": "IBM Plex Mono",
+    "category": "mono",
+    "roles": [
+      "mono"
+    ],
+    "weights": [
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700
+    ],
+    "variable": false,
+    "license": "OFL",
+    "fallback": "ui-monospace, monospace",
+    "tags": [
+      "technical",
+      "code"
+    ],
+    "source": "google/fonts METADATA.pb",
+    "class": "monospace"
+  },
+  {
+    "id": "hanken-grotesk",
+    "family": "Hanken Grotesk",
+    "category": "sans",
+    "roles": [
+      "body",
+      "display"
+    ],
+    "weights": [
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "system-ui, sans-serif",
+    "tags": [
+      "warm",
+      "body"
+    ],
+    "source": "google/fonts METADATA.pb",
+    "class": "neo-grotesk"
+  },
+  {
+    "id": "cormorant-garamond",
+    "family": "Cormorant Garamond",
+    "category": "serif",
+    "roles": [
+      "display"
+    ],
+    "weights": [
+      300,
+      400,
+      500,
+      600,
+      700
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "Georgia, serif",
+    "tags": [
+      "editorial",
+      "serif"
+    ],
+    "source": "google/fonts METADATA.pb",
+    "class": "oldstyle-serif"
+  },
+  {
+    "id": "newsreader",
+    "family": "Newsreader",
+    "category": "serif",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "Georgia, serif",
+    "tags": [
+      "editorial",
+      "literary"
+    ],
+    "source": "google/fonts METADATA.pb",
+    "class": "transitional-serif"
+  },
+  {
+    "id": "libre-franklin",
+    "family": "Libre Franklin",
+    "category": "sans",
+    "roles": [
+      "body",
+      "ui"
+    ],
+    "weights": [
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "system-ui, sans-serif",
+    "tags": [
+      "editorial",
+      "ui"
+    ],
+    "source": "google/fonts METADATA.pb",
+    "class": "neo-grotesk"
+  },
+  {
+    "id": "bricolage-grotesque",
+    "family": "Bricolage Grotesque",
+    "category": "sans",
+    "roles": [
+      "display"
+    ],
+    "weights": [
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "system-ui, sans-serif",
+    "tags": [
+      "playful",
+      "expressive"
+    ],
+    "source": "google/fonts METADATA.pb",
+    "class": "grotesk-display"
+  },
+  {
+    "id": "figtree",
+    "family": "Figtree",
+    "category": "sans",
+    "roles": [
+      "body",
+      "ui"
+    ],
+    "weights": [
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "system-ui, sans-serif",
+    "tags": [
+      "approachable",
+      "body"
+    ],
+    "source": "google/fonts METADATA.pb",
+    "class": "geometric-sans"
+  },
+  {
+    "id": "geist",
+    "family": "Geist",
+    "category": "sans",
+    "class": "neo-grotesk",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "system-ui, -apple-system, Segoe UI, sans-serif",
+    "tags": [
+      "neutral",
+      "technical",
+      "ui",
+      "contemporary"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "schibsted-grotesk",
+    "family": "Schibsted Grotesk",
+    "category": "sans",
+    "class": "neo-grotesk",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      400,
+      500,
+      600,
+      700,
+      800,
+      900
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "system-ui, -apple-system, Segoe UI, sans-serif",
+    "tags": [
+      "editorial",
+      "confident",
+      "ui"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "outfit",
+    "family": "Outfit",
+    "category": "sans",
+    "class": "geometric-sans",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "system-ui, -apple-system, Segoe UI, sans-serif",
+    "tags": [
+      "clean",
+      "modern",
+      "friendly"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "jost",
+    "family": "Jost",
+    "category": "sans",
+    "class": "geometric-sans",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "system-ui, -apple-system, Segoe UI, sans-serif",
+    "tags": [
+      "constructed",
+      "modernist",
+      "clean"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "source-sans-3",
+    "family": "Source Sans 3",
+    "category": "sans",
+    "class": "humanist-sans",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "system-ui, -apple-system, Segoe UI, sans-serif",
+    "tags": [
+      "readable",
+      "approachable",
+      "ui"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "alegreya-sans",
+    "family": "Alegreya Sans",
+    "category": "sans",
+    "class": "humanist-sans",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      100,
+      300,
+      400,
+      500,
+      700,
+      800,
+      900
+    ],
+    "variable": false,
+    "license": "OFL",
+    "fallback": "system-ui, -apple-system, Segoe UI, sans-serif",
+    "tags": [
+      "warm",
+      "literary",
+      "crafted"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "nunito",
+    "family": "Nunito",
+    "category": "sans",
+    "class": "rounded-sans",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900,
+      1000
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "system-ui, -apple-system, Segoe UI, sans-serif",
+    "tags": [
+      "soft",
+      "friendly",
+      "playful"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "quicksand",
+    "family": "Quicksand",
+    "category": "sans",
+    "class": "rounded-sans",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      300,
+      400,
+      500,
+      600,
+      700
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "system-ui, -apple-system, Segoe UI, sans-serif",
+    "tags": [
+      "soft",
+      "light",
+      "young"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "space-grotesk",
+    "family": "Space Grotesk",
+    "category": "sans",
+    "class": "grotesk-display",
+    "roles": [
+      "display"
+    ],
+    "weights": [
+      300,
+      400,
+      500,
+      600,
+      700
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "system-ui, -apple-system, Segoe UI, sans-serif",
+    "tags": [
+      "quirky",
+      "technical",
+      "characterful"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "syne",
+    "family": "Syne",
+    "category": "sans",
+    "class": "grotesk-display",
+    "roles": [
+      "display"
+    ],
+    "weights": [
+      400,
+      500,
+      600,
+      700,
+      800
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "system-ui, -apple-system, Segoe UI, sans-serif",
+    "tags": [
+      "avant-garde",
+      "expressive",
+      "bold"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "source-serif-4",
+    "family": "Source Serif 4",
+    "category": "serif",
+    "class": "transitional-serif",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "Georgia, 'Times New Roman', serif",
+    "tags": [
+      "trustworthy",
+      "readable",
+      "institutional"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "libre-baskerville",
+    "family": "Libre Baskerville",
+    "category": "serif",
+    "class": "transitional-serif",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      400,
+      500,
+      600,
+      700
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "Georgia, 'Times New Roman', serif",
+    "tags": [
+      "classic",
+      "institutional",
+      "bookish"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "eb-garamond",
+    "family": "EB Garamond",
+    "category": "serif",
+    "class": "oldstyle-serif",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      400,
+      500,
+      600,
+      700,
+      800
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "Georgia, 'Times New Roman', serif",
+    "tags": [
+      "literary",
+      "classic",
+      "crafted"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "crimson-pro",
+    "family": "Crimson Pro",
+    "category": "serif",
+    "class": "oldstyle-serif",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "Georgia, 'Times New Roman', serif",
+    "tags": [
+      "literary",
+      "warm",
+      "readable"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "playfair-display",
+    "family": "Playfair Display",
+    "category": "serif",
+    "class": "high-contrast-serif",
+    "roles": [
+      "display"
+    ],
+    "weights": [
+      400,
+      500,
+      600,
+      700,
+      800,
+      900
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "Georgia, 'Times New Roman', serif",
+    "tags": [
+      "elegant",
+      "dramatic",
+      "luxury"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "bodoni-moda",
+    "family": "Bodoni Moda",
+    "category": "serif",
+    "class": "high-contrast-serif",
+    "roles": [
+      "display"
+    ],
+    "weights": [
+      400,
+      500,
+      600,
+      700,
+      800,
+      900
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "Georgia, 'Times New Roman', serif",
+    "tags": [
+      "fashion",
+      "stark",
+      "dramatic"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "young-serif",
+    "family": "Young Serif",
+    "category": "serif",
+    "class": "soft-serif",
+    "roles": [
+      "display"
+    ],
+    "weights": [
+      400
+    ],
+    "variable": false,
+    "license": "OFL",
+    "fallback": "Georgia, 'Times New Roman', serif",
+    "tags": [
+      "warm",
+      "friendly",
+      "retro"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "lora",
+    "family": "Lora",
+    "category": "serif",
+    "class": "soft-serif",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      400,
+      500,
+      600,
+      700
+    ],
+    "variable": true,
+    "license": "OFL",
+    "fallback": "Georgia, 'Times New Roman', serif",
+    "tags": [
+      "warm",
+      "gentle",
+      "editorial"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "zilla-slab",
+    "family": "Zilla Slab",
+    "category": "serif",
+    "class": "slab-serif",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      300,
+      400,
+      500,
+      600,
+      700
+    ],
+    "variable": false,
+    "license": "OFL",
+    "fallback": "Georgia, 'Times New Roman', serif",
+    "tags": [
+      "sturdy",
+      "confident",
+      "editorial"
+    ],
+    "source": "google/fonts METADATA.pb"
+  },
+  {
+    "id": "roboto-slab",
+    "family": "Roboto Slab",
+    "category": "serif",
+    "class": "slab-serif",
+    "roles": [
+      "display",
+      "body"
+    ],
+    "weights": [
+      100,
+      200,
+      300,
+      400,
+      500,
+      600,
+      700,
+      800,
+      900
+    ],
+    "variable": true,
+    "license": "Apache-2.0",
+    "fallback": "Georgia, 'Times New Roman', serif",
+    "tags": [
+      "sturdy",
+      "rugged",
+      "retro"
+    ],
+    "source": "google/fonts METADATA.pb"
+  }
+]

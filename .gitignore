@@ -1,0 +1,7 @@
+docs/
+state.json
+plugin-data/
+__pycache__/
+*.pyc
+.env
+auth.json

@@ -1,0 +1,327 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$defs": {
+    "dimension": {
+      "type": "string",
+      "enum": [
+        "typography",
+        "color",
+        "layout",
+        "geometry",
+        "motion"
+      ]
+    },
+    "phase": {
+      "type": "string",
+      "enum": [
+        "discovering",
+        "directions",
+        "refining",
+        "final"
+      ]
+    },
+    "dim_status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "locked"
+      ]
+    },
+    "mode": {
+      "type": "string",
+      "enum": [
+        "light",
+        "dark"
+      ]
+    },
+    "trait": {
+      "type": "string",
+      "enum": [
+        "technical",
+        "cold",
+        "precise",
+        "dense",
+        "warm",
+        "natural",
+        "calm",
+        "sensory",
+        "editorial",
+        "literary",
+        "playful",
+        "bright",
+        "approachable",
+        "premium",
+        "spacious",
+        "emotive",
+        "industrial",
+        "mechanical",
+        "rugged",
+        "functional",
+        "institutional",
+        "sober",
+        "stark",
+        "avant-garde",
+        "graphic",
+        "minimal",
+        "expressive"
+      ]
+    },
+    "type_scale_id": {
+      "type": "string",
+      "enum": [
+        "compact",
+        "balanced",
+        "expressive",
+        "dramatic"
+      ]
+    },
+    "weight_contrast": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "inverted"
+      ]
+    },
+    "density": {
+      "type": "string",
+      "enum": [
+        "compact",
+        "comfortable",
+        "spacious",
+        "reading"
+      ]
+    },
+    "radius": {
+      "type": "string",
+      "enum": [
+        "none",
+        "slight",
+        "subtle",
+        "soft",
+        "round"
+      ]
+    },
+    "border": {
+      "type": "string",
+      "enum": [
+        "none",
+        "hairline",
+        "rule"
+      ]
+    },
+    "elevation": {
+      "type": "string",
+      "enum": [
+        "flat",
+        "soft",
+        "layered"
+      ]
+    },
+    "motion_preset": {
+      "type": "string",
+      "enum": [
+        "snappy",
+        "smooth",
+        "springy",
+        "none"
+      ]
+    },
+    "conflict_severity": {
+      "type": "string",
+      "enum": [
+        "tension",
+        "clash"
+      ]
+    }
+  },
+  "token_values": {
+    "type_scales": {
+      "compact": {
+        "ratio": 1.125,
+        "guidance": "Small steps between sizes. Use weight and color, not size, to separate levels."
+      },
+      "balanced": {
+        "ratio": 1.2,
+        "guidance": "Moderate steps. Headings are clearly larger without dominating."
+      },
+      "expressive": {
+        "ratio": 1.25,
+        "guidance": "Noticeable steps. Headlines can lead the page."
+      },
+      "dramatic": {
+        "ratio": 1.333,
+        "guidance": "Large steps. Let the headline be the most visible thing on the page, and keep everything below it quiet."
+      }
+    },
+    "weight_contrasts": {
+      "low": {
+        "display": 500,
+        "body": 400,
+        "guidance": "Hierarchy comes from size and space, not boldness."
+      },
+      "medium": {
+        "display": 600,
+        "body": 400,
+        "guidance": "Headings are firm but not heavy. Avoid bold body text."
+      },
+      "high": {
+        "display_min": 700,
+        "body": 400,
+        "guidance": "Headings are bold and confident. Use bold only for headings and primary actions."
+      },
+      "inverted": {
+        "display": 300,
+        "body": 400,
+        "guidance": "Display type is lighter than body. Use size, not weight, to create hierarchy, and only at large sizes."
+      }
+    },
+    "densities": {
+      "compact": {
+        "unit_px": 4,
+        "body_size_px": 14,
+        "line_height": 1.55,
+        "related_px": 8,
+        "group_px": 16,
+        "section_px": 44,
+        "inset_px": 32,
+        "guidance": "Favor information over air. Tables and lists over cards. Keep related items 8px apart and separate groups by at least 44px."
+      },
+      "comfortable": {
+        "unit_px": 8,
+        "body_size_px": 16,
+        "line_height": 1.55,
+        "related_px": 12,
+        "group_px": 16,
+        "section_px": 48,
+        "inset_px": 32,
+        "guidance": "Balanced. Cards and lists both work. Separate groups clearly, at least 48px."
+      },
+      "spacious": {
+        "unit_px": 8,
+        "body_size_px": 16,
+        "line_height": 1.5,
+        "related_px": 16,
+        "group_px": 20,
+        "section_px": 56,
+        "inset_px": 36,
+        "guidance": "Fewer things per screen, each given room. Separate groups by at least 56px."
+      },
+      "reading": {
+        "unit_px": 8,
+        "body_size_px": 19,
+        "line_height": 1.7,
+        "related_px": 16,
+        "group_px": 24,
+        "section_px": 64,
+        "inset_px": 40,
+        "max_measure_ch": 68,
+        "guidance": "Optimized for long text. Never exceed 68 characters per line. Separate sections by at least 64px."
+      },
+      "always": [
+        "More space above a heading than below it.",
+        "Actions sit close to what they act on.",
+        "Never use equal gaps between unrelated groups."
+      ]
+    },
+    "radii": {
+      "none": {
+        "component_px": 0,
+        "button_px": 0,
+        "guidance": "Square corners everywhere. Precise and formal."
+      },
+      "slight": {
+        "component_px": 3,
+        "button_px": 2,
+        "guidance": "Nearly square. Softens edges without reading as rounded."
+      },
+      "subtle": {
+        "component_px": 8,
+        "button_px": 6,
+        "guidance": "Gently rounded. Panels and buttons should look related but not identical."
+      },
+      "soft": {
+        "component_px": 14,
+        "button_px": 12,
+        "guidance": "Clearly rounded and friendly. Keep it consistent across all components."
+      },
+      "round": {
+        "component_px": 20,
+        "button_px": 14,
+        "guidance": "Very rounded. Use the larger radius only on large surfaces, never on small controls."
+      }
+    },
+    "borders": {
+      "none": {
+        "guidance": "Separate areas with space and surface color, not lines."
+      },
+      "hairline": {
+        "width_px": 1,
+        "contrast": "low",
+        "guidance": "1px low-contrast lines. Use for dividing rows and outlining panels."
+      },
+      "rule": {
+        "width_px": 1,
+        "contrast": "full_text",
+        "guidance": "1px full-strength lines. Use as structure, like a newspaper, not as decoration."
+      }
+    },
+    "elevations": {
+      "flat": {
+        "shadow_levels": 0,
+        "guidance": "No shadows. Separate layers with surface color or borders."
+      },
+      "soft": {
+        "shadow_levels": 1,
+        "guidance": "One diffuse shadow for floating elements only, such as menus and dialogs."
+      },
+      "layered": {
+        "shadow_levels": 2,
+        "guidance": "Two shadow levels: one for cards, one for floating elements. Never shadow and border on the same element."
+      }
+    },
+    "motion_presets": {
+      "snappy": {
+        "micro_ms": 100,
+        "navigation_ms": 180,
+        "easing": "ease-out",
+        "overshoot": false,
+        "guidance": "Fast and precise. 100ms for small changes, 180ms for navigation, ease-out, no overshoot."
+      },
+      "smooth": {
+        "micro_ms": 200,
+        "navigation_ms": 320,
+        "easing": "ease-in-out",
+        "overshoot": false,
+        "guidance": "Calm and considered. 200ms for small changes, 320ms for navigation, ease-in-out."
+      },
+      "springy": {
+        "micro_ms": 240,
+        "navigation_ms": 380,
+        "easing": "spring, gentle",
+        "overshoot": true,
+        "guidance": "Playful and physical. Gentle overshoot on buttons and toggles only, never on page transitions."
+      },
+      "none": {
+        "micro_ms": 0,
+        "navigation_ms": 0,
+        "easing": "none",
+        "overshoot": false,
+        "guidance": "No animation. State changes are instant."
+      },
+      "always": [
+        "Respect reduced-motion settings: under prefers-reduced-motion, all motion is off.",
+        "Animate only what the user caused, plus at most one moment on load."
+      ]
+    },
+    "color": {
+      "always": [
+        "The primary action is the most visible element on the page. Nothing else uses the accent at the same strength.",
+        "Status colors mean status only. Never use them for decoration.",
+        "Muted text is for supporting information, never for anything the user must read to act."
+      ],
+      "fill_only": "Never use the accent color for text."
+    }
+  }
+}

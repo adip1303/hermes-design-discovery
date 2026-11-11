@@ -1,0 +1,17 @@
+{
+  "id": "editorial",
+  "name": "Editorial",
+  "summary": "Type first, built for long reading.",
+  "not": "Graphics heavy.",
+  "traits": ["editorial", "literary", "precise", "spacious", "minimal"],
+  "use_when": "Long-form reading, reports, and publications",
+  "avoid_when": "Graphic-heavy marketing or dense operational dashboards",
+  "internal_refs": ["NYT"],
+  "design_notes": "Type first. Rules, not boxes. Ink blue-grey accent; no decorative color.",
+  "typography": { "display_font": "newsreader", "body_font": "newsreader", "ui_font": "libre-franklin", "mono_font": null, "scale": "dramatic", "weight_contrast": "low", "case": "sentence", "tracking_display": "-0.01em" },
+  "color": { "mode": "light", "background": "#FFFFFF", "surface": "#F6F6F4", "text": "#121212", "muted": "#5A5A5A", "border": "#E2E2E2", "border_strong": "#767676", "accent": "#2F4656", "accent_text": "#FFFFFF", "accent_alternates": ["#8A2F2F", "#121212"], "success": "#2E6B45", "warning": "#9A5300", "danger": "#B3261E", "focus": "#2F4656" },
+  "layout": { "density": "reading" },
+  "geometry": { "radius": "slight", "border": "rule", "elevation": "flat" },
+  "motion": { "preset": "smooth" },
+  "voice": { "tone": "Considered, literary, precise", "do": ["Complete sentences", "Specific detail", "Active voice"], "dont": ["Slang", "Sentence fragments", "Emoji"], "example": "Two needed a second attempt before dawn." }
+}

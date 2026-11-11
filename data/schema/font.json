@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "family", "category", "roles", "weights", "variable", "license", "fallback", "tags", "source"],
+  "properties": {
+    "id": { "type": "string", "pattern": "^[a-z0-9-]+$" },
+    "family": { "type": "string", "minLength": 1 },
+    "category": { "type": "string", "minLength": 1 },
+    "roles": { "type": "array", "minItems": 1, "uniqueItems": true, "items": { "type": "string", "enum": ["display", "body", "mono", "ui"] } },
+    "weights": { "type": ["array", "null"], "uniqueItems": true, "items": { "type": "integer", "minimum": 1 } },
+    "variable": { "type": ["boolean", "null"] },
+    "license": { "type": ["string", "null"] },
+    "fallback": { "type": "string", "minLength": 1 },
+    "tags": { "type": "array", "uniqueItems": true, "items": { "type": "string" } },
+    "source": { "type": "string", "minLength": 1 }
+  }
+}

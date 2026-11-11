@@ -1,0 +1,22 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object", "additionalProperties": false,
+  "required": ["schema_version", "active", "session_id", "rev", "phase", "brief", "answers", "user_messages", "directions", "working", "adjustments", "constraints", "rejected", "conflicts", "build_stamp", "exported_at"],
+  "properties": {
+    "schema_version": { "const": 1 }, "active": { "type": "boolean" }, "session_id": { "type": "string" }, "rev": { "type": "integer", "minimum": 0 }, "phase": { "$ref": "../enums.json#/$defs/phase" }, "brief": { "type": "string" },
+    "answers": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["q", "a"], "properties": { "q": { "type": "string" }, "a": { "type": "string" } } } }, "user_messages": { "type": "array", "maxItems": 50, "items": { "type": "string" } },
+    "directions": { "type": "array", "items": { "$ref": "direction.json" } },
+    "working": { "type": "object", "additionalProperties": false, "required": ["typography", "color", "layout", "geometry", "motion"], "properties": {
+      "typography": { "$ref": "#/$defs/working_dimension" }, "color": { "$ref": "#/$defs/working_dimension" }, "layout": { "$ref": "#/$defs/working_dimension" }, "geometry": { "$ref": "#/$defs/working_dimension" }, "motion": { "$ref": "#/$defs/working_dimension" }
+    } },
+    "adjustments": { "type": "object" },
+    "constraints": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["id", "text", "kind"], "properties": { "id": { "type": "string" }, "text": { "type": "string" }, "kind": { "type": "string", "enum": ["require", "avoid"] }, "path": { "type": "string" }, "value": {} } } },
+    "rejected": { "type": "object", "additionalProperties": false, "required": ["archetypes", "fonts", "accents"], "properties": { "archetypes": { "type": "object", "additionalProperties": false, "required": ["typography", "color", "layout", "geometry", "motion"], "properties": { "typography": { "$ref": "#/$defs/id_list" }, "color": { "$ref": "#/$defs/id_list" }, "layout": { "$ref": "#/$defs/id_list" }, "geometry": { "$ref": "#/$defs/id_list" }, "motion": { "$ref": "#/$defs/id_list" } } }, "fonts": { "$ref": "#/$defs/id_list" }, "accents": { "type": "array", "uniqueItems": true, "items": { "type": "string", "pattern": "^#[0-9A-Fa-f]{6}$" } } } },
+    "conflicts": { "type": "array", "items": { "type": "object", "additionalProperties": false, "required": ["rule_id", "between"], "properties": { "rule_id": { "type": "string" }, "between": { "type": "array", "minItems": 2, "maxItems": 2, "items": { "$ref": "../enums.json#/$defs/dimension" } } } } },
+    "build_stamp": { "type": ["object", "null"] }, "exported_at": { "type": ["string", "null"] }
+  },
+  "$defs": {
+    "working_dimension": { "type": "object", "additionalProperties": false, "required": ["source", "status"], "properties": { "source": { "type": ["string", "null"] }, "status": { "$ref": "../enums.json#/$defs/dim_status" } } },
+    "id_list": { "type": "array", "uniqueItems": true, "items": { "type": "string" } }
+  }
+}

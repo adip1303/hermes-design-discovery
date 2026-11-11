@@ -1,0 +1,17 @@
+{
+  "id": "precision-technical",
+  "name": "Precision Technical",
+  "summary": "Cold, calculated, engineered. Built for products that want to look like infrastructure.",
+  "not": "Comforting or emotional.",
+  "traits": ["technical", "cold", "precise", "dense", "minimal"],
+  "use_when": "AI, developer tools, data-heavy products",
+  "avoid_when": "Consumer wellness, food, anything that should feel human",
+  "internal_refs": ["Vercel", "Linear", "Ramp"],
+  "design_notes": "Neutral grayscale only; the primary action is the brightest element. Hue is reserved for status.",
+  "typography": { "display_font": "ibm-plex-sans", "body_font": "ibm-plex-sans", "ui_font": null, "mono_font": "ibm-plex-mono", "scale": "compact", "weight_contrast": "medium", "case": "sentence", "tracking_display": "-0.025em" },
+  "color": { "mode": "dark", "background": "#0A0A0A", "surface": "#141414", "text": "#EDEDED", "muted": "#8F8F8F", "border": "#262626", "border_strong": "#616161", "accent": "#EDEDED", "accent_text": "#0A0A0A", "accent_alternates": [], "success": "#4CC38A", "warning": "#F0B429", "danger": "#F26D6D", "focus": "#EDEDED" },
+  "layout": { "density": "compact" },
+  "geometry": { "radius": "subtle", "border": "hairline", "elevation": "flat" },
+  "motion": { "preset": "snappy" },
+  "voice": { "tone": "Precise, factual, terse", "do": ["Lead with numbers and states", "Use exact nouns", "Short declarative sentences"], "dont": ["Exclamation marks", "Emotional words", "Metaphors"], "example": "14 agents completed. 2 retried." }
+}
