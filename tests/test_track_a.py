@@ -65,7 +65,7 @@ def confirmed_understanding(plugin, session_id="one", summary=None, reply="yes, 
     plugin.pre_llm_call(session_id=session_id, user_message="I need a dashboard")
     plugin.post_llm_call(session_id=session_id, assistant_response="What should this help people do, and how should it feel?")
     plugin.pre_llm_call(session_id=session_id, user_message="It should feel clear and calm.")
-    recorded = json.loads(plugin.record_understanding({"summary": summary}, session_id=session_id))
+    recorded = json.loads(plugin.design_discovery_record_understanding({"summary": summary}, session_id=session_id))
     assert recorded["ok"] is True, recorded.get("error", recorded)
     plugin.pre_llm_call(session_id=session_id, user_message=reply)
     return reply
@@ -86,7 +86,7 @@ def generate(plugin, directions, session_id="one", expect_ok=True, **extra):
         summary=extra.pop("summary", None),
         reply=extra.pop("confirmed_by_user", "yes, that is right"),
     )
-    result = plugin.generate_directions({"directions": directions, "answers": ANSWERS, "confirmed_by_user": confirmation, **extra}, session_id=session_id)
+    result = plugin.design_discovery_generate_directions({"directions": directions, "answers": ANSWERS, "confirmed_by_user": confirmation, **extra}, session_id=session_id)
     parsed = json.loads(result)
     if expect_ok:
         assert parsed["ok"] is True, parsed.get("error", parsed)
@@ -94,7 +94,7 @@ def generate(plugin, directions, session_id="one", expect_ok=True, **extra):
 
 
 def update_success(plugin, args, session_id="one"):
-    result = json.loads(plugin.update_choice(args, session_id=session_id))
+    result = json.loads(plugin.design_discovery_update_choice(args, session_id=session_id))
     assert result["ok"] is True, result.get("error", result)
     return result
 
@@ -268,7 +268,7 @@ def test_fill_only_accent_usage_allows_non_text_contrast_and_exports_rule():
         generate(plugin, [choice])
         lock_all(plugin)
         confirm(plugin, "export it")
-        exported = json.loads(plugin.export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
+        exported = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
         assert "Never use the accent color for text" in exported["design_md"]
 
 
@@ -360,7 +360,7 @@ def test_composed_adjustment_rederives_usage_and_pane_and_export_mark_composed()
             confirm(plugin, words)
             update_success(plugin, {"action": "lock", "dimension": dimension, "direction_id": "Clay Morning", "confirmed_by_user": words})
         confirm(plugin, "export it")
-        exported = json.loads(plugin.export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
+        exported = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
         assert "## Tokens" in exported["design_md"] and "composed:" not in exported["design_md"]
 
 
@@ -391,7 +391,7 @@ def test_accent_outside_alternates_is_refused():
 def test_export_fails_until_all_dimensions_locked():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
-        assert json.loads(plugin.export_design_md({"confirmed_by_user": "confirmed"}, session_id="one"))["ok"] is False
+        assert json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "confirmed"}, session_id="one"))["ok"] is False
 
 
 def test_successful_export_sets_exported_at():
@@ -399,7 +399,7 @@ def test_successful_export_sets_exported_at():
         generate(plugin, [direction()])
         lock_all(plugin)
         confirm(plugin, "export it")
-        exported = json.loads(plugin.export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
+        exported = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
         assert exported["ok"] is True
         assert exported["state"]["exported_at"] is not None
         assert "## Voice" in exported["design_md"]
@@ -476,7 +476,7 @@ def test_latest_generic_yes_after_summary_is_used_for_export():
         lock_all(plugin)
         plugin.post_llm_call(session_id="one", assistant_response="This is the final direction. Export it when you are ready.")
         plugin.pre_llm_call(session_id="one", user_message="Yes")
-        exported = json.loads(plugin.export_design_md({"confirmed_by_user": "Yes"}, session_id="one"))
+        exported = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "Yes"}, session_id="one"))
         assert exported["ok"] is True
 
 
@@ -574,7 +574,7 @@ def test_adjust_works_on_locked_dimension():
         generate(plugin, [direction()])
         confirm(plugin, "round")
         update_success(plugin, {"action": "lock", "dimension": "geometry", "direction_id": "one", "confirmed_by_user": "round"})
-        adjusted = json.loads(plugin.update_choice({"action": "adjust", "path": "geometry.radius", "value": "round", "source": "user"}, session_id="one"))
+        adjusted = json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": "geometry.radius", "value": "round", "source": "user"}, session_id="one"))
         assert adjusted["ok"] is True, adjusted
         assert adjusted["state"]["working"]["geometry"]["status"] == "locked"
 
@@ -603,7 +603,7 @@ def test_design_md_lists_user_decisions_and_constraints():
         update_success(plugin, {"action": "add_constraint", "constraint": {"id": "voice", "text": "Keep the writing direct", "kind": "require"}, "confirmed_by_user": "Keep the writing direct"})
         lock_all(plugin)
         confirm(plugin, "export it")
-        exported = json.loads(plugin.export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
+        exported = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
         assert "Micro changes: 0ms" in exported["design_md"]
         assert "Keep the writing direct" in exported["design_md"]
 
@@ -619,7 +619,7 @@ def test_design_md_dont_items_read_correctly_after_dont():
             tokens["voice"] = {**tokens["voice"], "dont": ["Avoid empty jargon", "Don't sound robotic", "Avoid sounding robotic", "Use alarmist language"]}
             return tokens
         with patch.object(plugin, "resolve_direction", with_voice):
-            exported = json.loads(plugin.export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
+            exported = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
         assert exported["ok"] is True, exported.get("error", exported)
         section = exported["design_md"].split("Don't:\n", 1)[1].split("\n\n", 1)[0]
         items = [line[2:] for line in section.splitlines() if line.startswith("- ")]
@@ -630,18 +630,18 @@ def test_design_md_dont_items_read_correctly_after_dont():
 def test_generate_refuses_empty_interview_answers():
     with isolated_plugin() as plugin:
         interview_reply(plugin)
-        response = json.loads(plugin.generate_directions({"directions": [direction()], "answers": []}, session_id="one"))
+        response = json.loads(plugin.design_discovery_generate_directions({"directions": [direction()], "answers": []}, session_id="one"))
         assert response["ok"] is True and response["generated"] is False and "error" not in response and response["next"] == plugin._NEXT_INTERVIEW
 
 
 def test_record_understanding_requires_a_reply_after_the_brief():
     with isolated_plugin() as plugin:
         plugin.pre_llm_call(session_id="one", user_message="A bakery dashboard")
-        result = json.loads(plugin.record_understanding({"summary": "A warm bakery."}, session_id="one"))
+        result = json.loads(plugin.design_discovery_record_understanding({"summary": "A warm bakery."}, session_id="one"))
         assert result["ok"] is True and result["recorded"] is False and "error" not in result and result["next"] == plugin._NEXT_INTERVIEW
         assert result["state"]["understanding"] is None
         plugin.pre_llm_call(session_id="one", user_message="It should feel warm.")
-        assert json.loads(plugin.record_understanding({"summary": "A warm bakery."}, session_id="one"))["recorded"] is not False
+        assert json.loads(plugin.design_discovery_record_understanding({"summary": "A warm bakery."}, session_id="one"))["recorded"] is not False
 
 
 def test_generation_recovers_recorded_interview_answers_when_answers_are_omitted():
@@ -651,9 +651,9 @@ def test_generation_recovers_recorded_interview_answers_when_answers_are_omitted
         plugin.pre_llm_call(session_id="one", user_message="A neighborhood bakery that feels warm and unhurried.")
         plugin.post_llm_call(session_id="one", assistant_response="Who is it for?")
         plugin.pre_llm_call(session_id="one", user_message="People ordering bread for pickup.")
-        plugin.record_understanding({"summary": "A warm neighborhood bakery for bread pickup."}, session_id="one")
+        plugin.design_discovery_record_understanding({"summary": "A warm neighborhood bakery for bread pickup."}, session_id="one")
         plugin.pre_llm_call(session_id="one", user_message="Yes, that is right")
-        result = json.loads(plugin.generate_directions({"directions": varied_directions(), "confirmed_by_user": "Yes, that is right"}, session_id="one"))
+        result = json.loads(plugin.design_discovery_generate_directions({"directions": varied_directions(), "confirmed_by_user": "Yes, that is right"}, session_id="one"))
         assert result["ok"] is True
         assert result["state"]["answers"] == [
             {"q": "What are you making, and how should it feel?", "a": "A neighborhood bakery that feels warm and unhurried."},
@@ -667,9 +667,9 @@ def test_run_8b_recovery_uses_the_pre_summary_user_brief_without_a_question_pair
         plugin.pre_llm_call(session_id="one", user_message="A morning dashboard for checking agents that feels warm, not generic SaaS.")
         plugin.post_llm_call(session_id="one", assistant_response="What should people notice first?")
         plugin.pre_llm_call(session_id="one", user_message="The morning status at a glance.")
-        plugin.record_understanding({"summary": "A warm morning dashboard for checking agents."}, session_id="one")
+        plugin.design_discovery_record_understanding({"summary": "A warm morning dashboard for checking agents."}, session_id="one")
         plugin.pre_llm_call(session_id="one", user_message="Yes, that is right")
-        result = json.loads(plugin.generate_directions({"directions": varied_directions(), "confirmed_by_user": "Yes, that is right"}, session_id="one"))
+        result = json.loads(plugin.design_discovery_generate_directions({"directions": varied_directions(), "confirmed_by_user": "Yes, that is right"}, session_id="one"))
         assert result["ok"] is True
         assert result["state"]["answers"] == [{"q": "What should people notice first?", "a": "The morning status at a glance."}]
 
@@ -702,15 +702,15 @@ def test_generate_schema_exposes_lenient_sample_and_voice_shapes_without_hard_li
 def test_no_interview_refusal_stays_specific_after_understanding_confirmation():
     with isolated_plugin() as plugin:
         plugin.pre_llm_call(session_id="one", user_message="A warm bakery for pickup orders.")
-        plugin.record_understanding({"summary": "A warm bakery for pickup orders."}, session_id="one")
+        plugin.design_discovery_record_understanding({"summary": "A warm bakery for pickup orders."}, session_id="one")
         plugin.pre_llm_call(session_id="one", user_message="Yes, that is right")
-        refused = json.loads(plugin.generate_directions({"directions": varied_directions(), "confirmed_by_user": "Yes, that is right"}, session_id="one"))
+        refused = json.loads(plugin.design_discovery_generate_directions({"directions": varied_directions(), "confirmed_by_user": "Yes, that is right"}, session_id="one"))
         assert refused["ok"] is True and refused["generated"] is False and "error" not in refused and refused["next"] == plugin._NEXT_INTERVIEW
 
 
 def test_generate_requires_exactly_three_directions():
     with isolated_plugin() as plugin:
-        refused = json.loads(plugin.generate_directions({"directions": [direction()], "answers": ANSWERS}, session_id="one"))
+        refused = json.loads(plugin.design_discovery_generate_directions({"directions": [direction()], "answers": ANSWERS}, session_id="one"))
         assert refused["ok"] is False
         assert refused["error"] == "Provide exactly three directions, each with a distinct user-noticeable approach."
         directions = varied_directions()
@@ -722,29 +722,29 @@ def test_generate_requires_exactly_three_directions():
 def test_user_adjustment_requires_matching_user_message():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
-        adjusted = json.loads(plugin.update_choice({"action": "adjust", "path": "motion.preset", "value": "none", "source": "user"}, session_id="one"))
+        adjusted = json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": "motion.preset", "value": "none", "source": "user"}, session_id="one"))
         assert adjusted["ok"] is True and "error" not in adjusted and adjusted["warnings"]
         assert adjusted["state"]["adjustments"]["motion.preset"]["source"] == "agent"
         assert "motion.preset" not in {item["path"] for item in plugin._user_decisions(adjusted["state"])}
         lock_all(plugin); confirm(plugin, "export it")
-        document = json.loads(plugin.export_design_md({"confirmed_by_user": "export it"}, session_id="one"))["design_md"]
+        document = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "export it"}, session_id="one"))["design_md"]
         assert "Motion: none (your choice)" not in document
         confirm(plugin, "none")
-        assert json.loads(plugin.update_choice({"action": "adjust", "path": "motion.preset", "value": "none", "source": "user"}, session_id="one"))["ok"] is True
+        assert json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": "motion.preset", "value": "none", "source": "user"}, session_id="one"))["ok"] is True
 
 
 def test_confirmation_required_for_lock_reject_constraint_and_export():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
-        lock = json.loads(plugin.update_choice({"action": "lock", "dimension": "color", "direction_id": "one"}, session_id="one"))
-        reject = json.loads(plugin.update_choice({"action": "reject", "dimension": "color", "archetype_id": "quiet-warmth"}, session_id="one"))
-        constrained = json.loads(plugin.update_choice({"action": "add_constraint", "constraint": {"id": "x", "text": "Use light", "kind": "require"}}, session_id="one"))
-        exported = json.loads(plugin.export_design_md({}, session_id="one"))
+        lock = json.loads(plugin.design_discovery_update_choice({"action": "lock", "dimension": "color", "direction_id": "one"}, session_id="one"))
+        reject = json.loads(plugin.design_discovery_update_choice({"action": "reject", "dimension": "color", "archetype_id": "quiet-warmth"}, session_id="one"))
+        constrained = json.loads(plugin.design_discovery_update_choice({"action": "add_constraint", "constraint": {"id": "x", "text": "Use light", "kind": "require"}}, session_id="one"))
+        exported = json.loads(plugin.design_discovery_export_design_md({}, session_id="one"))
         assert all(item["error"] == "Ask the user to approve this in their own words, then pass their exact words as confirmed_by_user." for item in (lock, reject, constrained, exported))
         confirm(plugin, "yes, confirm it")
-        assert json.loads(plugin.update_choice({"action": "lock", "dimension": "color", "direction_id": "one", "confirmed_by_user": "confirm"}, session_id="one"))["ok"] is True
-        assert json.loads(plugin.update_choice({"action": "reject", "dimension": "color", "archetype_id": "bright-friendly", "confirmed_by_user": "confirm"}, session_id="one"))["ok"] is True
-        assert json.loads(plugin.update_choice({"action": "add_constraint", "constraint": {"id": "y", "text": "Keep it simple", "kind": "require"}, "confirmed_by_user": "confirm"}, session_id="one"))["ok"] is True
+        assert json.loads(plugin.design_discovery_update_choice({"action": "lock", "dimension": "color", "direction_id": "one", "confirmed_by_user": "confirm"}, session_id="one"))["ok"] is True
+        assert json.loads(plugin.design_discovery_update_choice({"action": "reject", "dimension": "color", "archetype_id": "bright-friendly", "confirmed_by_user": "confirm"}, session_id="one"))["ok"] is True
+        assert json.loads(plugin.design_discovery_update_choice({"action": "add_constraint", "constraint": {"id": "y", "text": "Keep it simple", "kind": "require"}, "confirmed_by_user": "confirm"}, session_id="one"))["ok"] is True
 
 
 def test_hook_records_only_matching_session_messages_and_keeps_last_50():
@@ -772,7 +772,7 @@ def test_pre_tool_hook_blocks_building_until_export_and_allows_design_tools():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
         blocked = plugin.pre_tool_call(tool_name="write_file", session_id="one")
-        assert blocked == {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported. If the user wants to stop designing or do something else, call update_choice with action end."}
+        assert blocked == {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported. If the user wants to stop designing or do something else, call design_discovery_update_choice with action end."}
         assert plugin.pre_tool_call(tool_name="design_discovery_get_state", session_id="one") is None
         state_value = state.get_state("one"); state_value["phase"] = "final"; state.replace_state(state_value, "one")
         assert plugin.pre_tool_call(tool_name="terminal", session_id="one") is None
@@ -848,7 +848,7 @@ def test_other_skill_load_is_blocked_only_for_active_session():
     with isolated_plugin() as plugin:
         assert plugin.pre_tool_call(tool_name="skill_view", args={"skill_name": "claude-design"}, session_id="one") is None
         generate(plugin, [direction()], session_id="one")
-        assert plugin.pre_tool_call(tool_name="skill_view", args={"skill_name": "claude-design"}, session_id="one") == {"action": "block", "message": "You’re in a design discovery session. Use only the design discovery tools until DESIGN.md is exported. If the user wants to stop designing or do something else, call update_choice with action end."}
+        assert plugin.pre_tool_call(tool_name="skill_view", args={"skill_name": "claude-design"}, session_id="one") == {"action": "block", "message": "You’re in a design discovery session. Use only the design discovery tools until DESIGN.md is exported. If the user wants to stop designing or do something else, call design_discovery_update_choice with action end."}
         assert plugin.pre_tool_call(tool_name="skill_view", args={"skill_name": "design-discovery:design-discovery"}, session_id="one") is None
 
 
@@ -856,21 +856,21 @@ def test_design_tool_results_include_prescriptive_next_steps():
     with isolated_plugin() as plugin:
         empty = json.loads(plugin.design_discovery_get_state({}, session_id="one"))
         no_internals = " Keep the reply focused on the selected direction and its design, using plain language rather than implementation terms."
-        assert empty["next"] == "Ask the user what they’re making, who it’s for, how it should feel, and what they don’t want. Then call record_understanding with what you understood, show it to the user, and wait for them to confirm before generating directions." + no_internals
+        assert empty["next"] == "Ask the user what they’re making, who it’s for, how it should feel, and what they don’t want. Then call design_discovery_record_understanding with what you understood, show it to the user, and wait for them to confirm before generating directions." + no_internals
         generated = json.loads(generate(plugin, [direction()]))
         assert json.loads(plugin.design_discovery_get_state({}, session_id="one"))["next"] == "Use the resolved directions to continue the design discovery conversation." + no_internals
         assert generated["next"] == "Describe each direction in one plain sentence and tell the user the pane shows them. Ask which is closest and what they would change, then stop. Do not recommend one. Do not offer to build, mock up, or render anything outside the pane. Do not lock anything until the user says so. Never name archetypes or design systems; describe what each direction does. When the user likes a direction but wants a change, use try for that whole direction, then adjust only what they asked for. Never lock until they approve what the pane shows. Use these direction ids for try and lock: dir-a (One), dir-b (One), dir-c (One)."
         confirm(plugin)
-        updated = json.loads(plugin.update_choice({"action": "lock", "dimension": "color", "direction_id": "one", "confirmed_by_user": "confirmed"}, session_id="one"))
+        updated = json.loads(plugin.design_discovery_update_choice({"action": "lock", "dimension": "color", "direction_id": "one", "confirmed_by_user": "confirmed"}, session_id="one"))
         assert updated["next"] == plugin._NEXT_CHANGED
-        refused = json.loads(plugin.update_choice({"action": "lock", "dimension": "layout", "direction_id": "one"}, session_id="one"))
+        refused = json.loads(plugin.design_discovery_update_choice({"action": "lock", "dimension": "layout", "direction_id": "one"}, session_id="one"))
         assert refused["next"] == "Ask the user in plain words whether they want this. Do not suggest wording for their reply."
         for dimension in ("typography", "layout", "geometry", "motion"):
             words = "lock " + dimension
             confirm(plugin, words)
             update_success(plugin, {"action": "lock", "dimension": dimension, "direction_id": "one", "confirmed_by_user": words})
         confirm(plugin, "export it")
-        exported = json.loads(plugin.export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
+        exported = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
     assert exported["next"] == "Give the user this saved path in one line and stop."
 
 
@@ -885,7 +885,7 @@ def test_generate_refuses_starting_point_names_in_labels():
 
 def test_unknown_action_has_a_specific_recovery_step():
     with isolated_plugin() as plugin:
-        refused = json.loads(plugin.update_choice({"action": "unknown"}, session_id="one"))
+        refused = json.loads(plugin.design_discovery_update_choice({"action": "unknown"}, session_id="one"))
         assert refused["next"] == "Use one of these actions: try, approve_direction, lock, unlock, reject, clear_reject, adjust, add_constraint, or remove_constraint."
 
 
@@ -903,7 +903,7 @@ def test_suggested_quoted_confirmation_is_refused():
         generate(plugin, [direction()])
         plugin.post_llm_call(session_id="one", assistant_response='Reply “YES, CONFIRM IT!” when you agree.')
         plugin.pre_llm_call(session_id="one", user_message="yes, confirm it!")
-        refused = json.loads(plugin.update_choice({"action": "lock", "dimension": "color", "direction_id": "one", "confirmed_by_user": "yes, confirm it!"}, session_id="one"))
+        refused = json.loads(plugin.design_discovery_update_choice({"action": "lock", "dimension": "color", "direction_id": "one", "confirmed_by_user": "yes, confirm it!"}, session_id="one"))
         assert refused["ok"] is False
         assert refused["next"] == "Ask the user in your own words whether they approve. Do not suggest how to reply, then wait."
 
@@ -914,27 +914,27 @@ SKILL_INVOCATION = '[IMPORTANT: The user has invoked the "design-discovery:desig
 def test_clarify_answer_from_host_counts_as_interview_reply():
     with isolated_plugin() as plugin:
         plugin.pre_llm_call(session_id="one", user_message=SKILL_INVOCATION)
-        blocked = plugin.record_understanding({"summary": "You want a calm dashboard."}, session_id="one")
+        blocked = plugin.design_discovery_record_understanding({"summary": "You want a calm dashboard."}, session_id="one")
         assert json.loads(blocked)["recorded"] is False
         answer = "A morning check of which agents failed overnight. Warm, not generic SaaS."
         plugin.post_tool_call(tool_name="clarify", session_id="one", status="ok", args={"question": "What is it and how should it feel?"}, result=json.dumps({"question": "What is it and how should it feel?", "choices_offered": None, "user_response": answer}))
         saved = state.get_state("one")
         assert {"role": "user", "text": answer, "source": "clarify"} in [{key: event[key] for key in ("role", "text", "source") if key in event} for event in saved["message_events"]]
-        recorded = json.loads(plugin.record_understanding({"summary": "You want a warm morning dashboard that shows failed agents."}, session_id="one"))
+        recorded = json.loads(plugin.design_discovery_record_understanding({"summary": "You want a warm morning dashboard that shows failed agents."}, session_id="one"))
         assert recorded["ok"] is True and recorded["recorded"] is True
 
 
 def test_agent_supplied_answers_alone_do_not_satisfy_the_interview_gate():
     with isolated_plugin() as plugin:
         plugin.pre_llm_call(session_id="one", user_message=SKILL_INVOCATION)
-        assert json.loads(plugin.record_understanding({"summary": "You want a warm dashboard."}, session_id="one"))["recorded"] is False
+        assert json.loads(plugin.design_discovery_record_understanding({"summary": "You want a warm dashboard."}, session_id="one"))["recorded"] is False
         saved = state.get_state("one")
         saved["answers"] = [{"question": "How should it feel?", "answer": "Warm and inviting"}]
         state.replace_state(saved, "one")
         plugin.post_tool_call(tool_name="clarify", session_id="one", status="error", result=json.dumps({"error": "cancelled"}))
         plugin.post_tool_call(tool_name="design_discovery_get_state", session_id="one", status="ok", result=json.dumps({"user_response": "Warm and inviting"}))
-        plugin.generate_directions({"directions": varied_directions(), "answers": ANSWERS, "confirmed_by_user": "yes"}, session_id="one")
-        recorded = json.loads(plugin.record_understanding({"summary": "You want a warm dashboard."}, session_id="one"))
+        plugin.design_discovery_generate_directions({"directions": varied_directions(), "answers": ANSWERS, "confirmed_by_user": "yes"}, session_id="one")
+        recorded = json.loads(plugin.design_discovery_record_understanding({"summary": "You want a warm dashboard."}, session_id="one"))
         assert recorded["recorded"] is False
         assert recorded["next"] == plugin._NEXT_INTERVIEW
 
@@ -951,12 +951,12 @@ def clarify_log_lines():
 def test_real_clarify_responses_count_as_interview_replies_and_are_logged_without_text():
     with isolated_plugin() as plugin:
         plugin.pre_llm_call(session_id="one", user_message=SKILL_INVOCATION)
-        assert json.loads(plugin.record_understanding({"summary": "You want a calm dashboard."}, session_id="one"))["recorded"] is False
+        assert json.loads(plugin.design_discovery_record_understanding({"summary": "You want a calm dashboard."}, session_id="one"))["recorded"] is False
         answers = ["It'll be just me. I'll be using it to track which agents broke or failed overnight", "Warm and human"]
         plugin.post_tool_call(tool_name="clarify", session_id="one", status="ok", args={"questions": ["agent supplied"]}, result=clarify_result(*answers))
         saved = state.get_state("one")
         assert [event["text"] for event in saved["message_events"] if event.get("source") == "clarify"] == answers
-        recorded = json.loads(plugin.record_understanding({"summary": "You want a warm morning dashboard that shows failed agents."}, session_id="one"))
+        recorded = json.loads(plugin.design_discovery_record_understanding({"summary": "You want a warm morning dashboard that shows failed agents."}, session_id="one"))
         assert recorded["ok"] is True and recorded["recorded"] is True
         plugin.post_tool_call(tool_name="clarify", session_id="one", status="ok", result=clarify_result(None, outcome="cancelled"))
         lines = clarify_log_lines()
@@ -967,13 +967,13 @@ def test_real_clarify_responses_count_as_interview_replies_and_are_logged_withou
 def test_understanding_confirmed_through_clarify_lets_generate_directions_succeed():
     with isolated_plugin() as plugin:
         plugin.pre_llm_call(session_id="one", user_message=SKILL_INVOCATION)
-        assert json.loads(plugin.record_understanding({"summary": "You want a calm dashboard."}, session_id="one"))["recorded"] is False
+        assert json.loads(plugin.design_discovery_record_understanding({"summary": "You want a calm dashboard."}, session_id="one"))["recorded"] is False
         plugin.post_tool_call(tool_name="clarify", session_id="one", status="ok", result=clarify_result("It'll be just me, tracking which agents failed overnight", "Warm and human"))
-        recorded = json.loads(plugin.record_understanding({"summary": "You want a personal morning dashboard that shows failed agents. It should feel warm, not generic SaaS."}, session_id="one"))
+        recorded = json.loads(plugin.design_discovery_record_understanding({"summary": "You want a personal morning dashboard that shows failed agents. It should feel warm, not generic SaaS."}, session_id="one"))
         assert recorded["recorded"] is True and recorded["next"] == plugin._NEXT_UNDERSTANDING
         reply = "Thats correct. Generate the directions please"
         plugin.post_tool_call(tool_name="clarify", session_id="one", status="ok", result=clarify_result(reply))
-        accepted = json.loads(plugin.generate_directions({"directions": varied_directions(), "answers": ANSWERS, "confirmed_by_user": reply}, session_id="one"))
+        accepted = json.loads(plugin.design_discovery_generate_directions({"directions": varied_directions(), "answers": ANSWERS, "confirmed_by_user": reply}, session_id="one"))
         assert accepted["ok"] is True, accepted.get("error", accepted)
         assert accepted["generated"] is not False
         assert reply not in json.dumps(clarify_log_lines())
@@ -982,17 +982,17 @@ def test_understanding_confirmed_through_clarify_lets_generate_directions_succee
 def test_generate_without_recorded_understanding_points_to_record_understanding():
     with isolated_plugin() as plugin:
         interview_reply(plugin)
-        refused = json.loads(plugin.generate_directions({"directions": varied_directions(), "answers": ANSWERS, "confirmed_by_user": "yes"}, session_id="one"))
+        refused = json.loads(plugin.design_discovery_generate_directions({"directions": varied_directions(), "answers": ANSWERS, "confirmed_by_user": "yes"}, session_id="one"))
         assert refused["ok"] is False
         assert refused["error"] == "understanding confirmation is required"
-        assert refused["next"].startswith("Nothing was generated. Call record_understanding with what you understood, show it to the user")
+        assert refused["next"].startswith("Nothing was generated. Call design_discovery_record_understanding with what you understood, show it to the user")
 
 
 def test_generate_with_unconfirmed_recorded_understanding_points_to_recording_the_confirmation():
     with isolated_plugin() as plugin:
         summary = "You want a calm dashboard for people who need clarity each morning."
         interview_reply(plugin)
-        recorded = json.loads(plugin.record_understanding({"summary": summary}, session_id="one"))
+        recorded = json.loads(plugin.design_discovery_record_understanding({"summary": summary}, session_id="one"))
         assert recorded["ok"] is True and recorded["recorded"] is True
         saved = state.get_state("one")
         saved["message_events"] = [event for event in saved["message_events"] if event.get("role") != "understanding"]
@@ -1001,14 +1001,14 @@ def test_generate_with_unconfirmed_recorded_understanding_points_to_recording_th
         reply = "Yes thats correct. Generate the directions please"
         plugin.pre_llm_call(session_id="one", user_message=reply)
         request = {"directions": varied_directions(), "answers": ANSWERS, "confirmed_by_user": reply}
-        refused = json.loads(plugin.generate_directions(request, session_id="one"))
+        refused = json.loads(plugin.design_discovery_generate_directions(request, session_id="one"))
         assert refused["ok"] is False
         assert refused["error"] == "understanding confirmation is required"
-        assert "If the user has already confirmed it, call record_understanding with the summary you showed them, then call generate_directions with their reply, word for word, as confirmed_by_user." in refused["next"]
+        assert "If the user has already confirmed it, call design_discovery_record_understanding with the summary you showed them, then call design_discovery_generate_directions with their reply, word for word, as confirmed_by_user." in refused["next"]
         assert "If they have not replied yet, show them the summary and wait for their reply." in refused["next"]
         assert "—" not in refused["next"] and "–" not in refused["next"]
-        json.loads(plugin.record_understanding({"summary": summary}, session_id="one"))
-        accepted = json.loads(plugin.generate_directions(request, session_id="one"))
+        json.loads(plugin.design_discovery_record_understanding({"summary": summary}, session_id="one"))
+        accepted = json.loads(plugin.design_discovery_generate_directions(request, session_id="one"))
         assert accepted["ok"] is True, accepted.get("error", accepted)
 
 
@@ -1016,17 +1016,17 @@ def test_generate_requires_recorded_understanding_and_later_user_confirmation():
     with isolated_plugin() as plugin:
         request = {"directions": varied_directions(), "answers": ANSWERS, "confirmed_by_user": "yes"}
         interview_reply(plugin)
-        refused = json.loads(plugin.generate_directions(request, session_id="one"))
+        refused = json.loads(plugin.design_discovery_generate_directions(request, session_id="one"))
         assert refused["ok"] is False
-        assert refused["next"] == "Nothing was generated. Call record_understanding with what you understood, show it to the user, and wait for their reply. Never describe directions that haven’t been generated."
+        assert refused["next"] == "Nothing was generated. Call design_discovery_record_understanding with what you understood, show it to the user, and wait for their reply. Never describe directions that haven’t been generated."
         plugin.pre_llm_call(session_id="one", user_message="yes")
-        recorded = json.loads(plugin.record_understanding({"summary": "You want a calm dashboard with a clear morning ritual."}, session_id="one"))
+        recorded = json.loads(plugin.design_discovery_record_understanding({"summary": "You want a calm dashboard with a clear morning ritual."}, session_id="one"))
         assert recorded["next"] == "Show the user this summary in your own words and ask if it’s right. Then stop and wait for their reply."
-        refused = json.loads(plugin.generate_directions(request, session_id="one"))
+        refused = json.loads(plugin.design_discovery_generate_directions(request, session_id="one"))
         assert refused["ok"] is False
         assert refused["next"] == "The user hasn’t replied yet. Show them your understanding and wait for their reply."
         plugin.pre_llm_call(session_id="one", user_message="yes")
-        accepted = json.loads(plugin.generate_directions(request, session_id="one"))
+        accepted = json.loads(plugin.design_discovery_generate_directions(request, session_id="one"))
         assert accepted["ok"] is True
 
 
@@ -1034,33 +1034,33 @@ def test_replacing_understanding_requires_a_fresh_confirmation():
     with isolated_plugin() as plugin:
         request = {"directions": varied_directions(), "answers": ANSWERS, "confirmed_by_user": "yes"}
         interview_reply(plugin)
-        plugin.record_understanding({"summary": "First understanding in two plain sentences."}, session_id="one")
+        plugin.design_discovery_record_understanding({"summary": "First understanding in two plain sentences."}, session_id="one")
         plugin.pre_llm_call(session_id="one", user_message="yes")
-        recorded = json.loads(plugin.record_understanding({"summary": "Second understanding in two plain sentences."}, session_id="one"))
-        assert recorded["next"] == "The understanding is already confirmed. Call generate_directions with the user’s reply as confirmed_by_user. Do not call record_understanding again."
+        recorded = json.loads(plugin.design_discovery_record_understanding({"summary": "Second understanding in two plain sentences."}, session_id="one"))
+        assert recorded["next"] == "The understanding is already confirmed. Call design_discovery_generate_directions with the user’s reply as confirmed_by_user. Do not call design_discovery_record_understanding again."
         assert state.get_state("one")["understanding"] == {"summary": "Second understanding in two plain sentences."}
-        assert json.loads(plugin.generate_directions(request, session_id="one"))["ok"] is True
+        assert json.loads(plugin.design_discovery_generate_directions(request, session_id="one"))["ok"] is True
 
 
 def test_understanding_confirmation_refusals_and_state_guidance_follow_the_latest_reply():
     request = {"directions": varied_directions(), "answers": ANSWERS}
     with isolated_plugin() as plugin:
         interview_reply(plugin)
-        plugin.record_understanding({"summary": "You want a calm dashboard with a clear morning ritual."}, session_id="one")
+        plugin.design_discovery_record_understanding({"summary": "You want a calm dashboard with a clear morning ritual."}, session_id="one")
         waiting = json.loads(plugin.design_discovery_get_state({}, session_id="one"))
         assert waiting["next"] == "The user hasn’t replied yet. Show them your understanding and wait for their reply. Keep the reply focused on the selected direction and its design, using plain language rather than implementation terms."
         plugin.pre_llm_call(session_id="one", user_message="Yes thats correct. Generate the options please")
-        omitted = json.loads(plugin.generate_directions(request, session_id="one"))
+        omitted = json.loads(plugin.design_discovery_generate_directions(request, session_id="one"))
         assert omitted["error"] == "understanding confirmation is missing"
-        assert omitted["next"] == "The user has replied to the summary. Call generate_directions with that reply, word for word, as confirmed_by_user. Do not call record_understanding again."
+        assert omitted["next"] == "The user has replied to the summary. Call design_discovery_generate_directions with that reply, word for word, as confirmed_by_user. Do not call design_discovery_record_understanding again."
         state_after_reply = json.loads(plugin.design_discovery_get_state({}, session_id="one"))
-        assert state_after_reply["next"] == "Call generate_directions with the user’s reply, word for word, as confirmed_by_user. Do not call record_understanding again. Keep the reply focused on the selected direction and its design, using plain language rather than implementation terms."
-        mismatched = json.loads(plugin.generate_directions({**request, "confirmed_by_user": "totally unrelated"}, session_id="one"))
+        assert state_after_reply["next"] == "Call design_discovery_generate_directions with the user’s reply, word for word, as confirmed_by_user. Do not call design_discovery_record_understanding again. Keep the reply focused on the selected direction and its design, using plain language rather than implementation terms."
+        mismatched = json.loads(plugin.design_discovery_generate_directions({**request, "confirmed_by_user": "totally unrelated"}, session_id="one"))
         assert mismatched["error"] == "understanding confirmation did not match the latest user reply"
         assert mismatched["next"] == "Pass the user’s reply exactly as they wrote it as confirmed_by_user."
-        recorded_again = json.loads(plugin.record_understanding({"summary": "You want a calm dashboard with a clear morning ritual."}, session_id="one"))
-        assert recorded_again["next"] == "The understanding is already confirmed. Call generate_directions with the user’s reply as confirmed_by_user. Do not call record_understanding again."
-        accepted = json.loads(plugin.generate_directions({**request, "confirmed_by_user": "Yes thats correct. Generate the options please"}, session_id="one"))
+        recorded_again = json.loads(plugin.design_discovery_record_understanding({"summary": "You want a calm dashboard with a clear morning ritual."}, session_id="one"))
+        assert recorded_again["next"] == "The understanding is already confirmed. Call design_discovery_generate_directions with the user’s reply as confirmed_by_user. Do not call design_discovery_record_understanding again."
+        accepted = json.loads(plugin.design_discovery_generate_directions({**request, "confirmed_by_user": "Yes thats correct. Generate the options please"}, session_id="one"))
         assert accepted["ok"] is True
 
 
@@ -1069,7 +1069,7 @@ def test_try_sets_sources_without_confirmation_or_locks():
     second["id"], second["label"] = "two", "Two"
     with isolated_plugin() as plugin:
         generate(plugin, [direction(), second])
-        tried = json.loads(plugin.update_choice({"action": "try", "directions": {"typography": "one", "color": "two"}}, session_id="one"))
+        tried = json.loads(plugin.design_discovery_update_choice({"action": "try", "directions": {"typography": "one", "color": "two"}}, session_id="one"))
         assert tried["ok"] is True
         assert tried["next"] == plugin._NEXT_CHANGED
         assert tried["state"]["working"]["typography"]["source"] == direction()["sources"]["typography"]
@@ -1082,12 +1082,12 @@ def test_try_refuses_locked_dimension_and_partial_try_fills_the_mix():
     second["id"], second["label"] = "two", "Two"
     with isolated_plugin() as plugin:
         generate(plugin, [direction(), second])
-        partial = json.loads(plugin.update_choice({"action": "try", "directions": {"color": "two"}}, session_id="one"))
+        partial = json.loads(plugin.design_discovery_update_choice({"action": "try", "directions": {"color": "two"}}, session_id="one"))
         assert "Filled unset dimensions from Two" in partial["detail"]
         assert all(value["source"] for value in partial["state"]["working"].values())
         confirm(plugin)
-        assert json.loads(plugin.update_choice({"action": "lock", "dimension": "color", "confirmed_by_user": "confirmed"}, session_id="one"))["ok"] is True
-        refused = json.loads(plugin.update_choice({"action": "try", "directions": {"color": "one"}}, session_id="one"))
+        assert json.loads(plugin.design_discovery_update_choice({"action": "lock", "dimension": "color", "confirmed_by_user": "confirmed"}, session_id="one"))["ok"] is True
+        refused = json.loads(plugin.design_discovery_update_choice({"action": "try", "directions": {"color": "one"}}, session_id="one"))
         assert refused["ok"] is False
         assert refused["error"] == "Cannot try color because it is locked."
 
@@ -1100,7 +1100,7 @@ def test_route_returns_working_mix_and_lock_after_try_needs_confirmation():
         working = api.resolved_state("one")["resolved_working"]
         assert working["dimensions"] and all(entry["status"] == "open" for entry in working["dimensions"])
         assert not any(entry["status"] == "locked" for entry in working["dimensions"])
-        refused = json.loads(plugin.update_choice({"action": "lock", "dimension": "typography"}, session_id="one"))
+        refused = json.loads(plugin.design_discovery_update_choice({"action": "lock", "dimension": "typography"}, session_id="one"))
         assert refused["error"] == "Ask the user to approve this in their own words, then pass their exact words as confirmed_by_user."
 
 
@@ -1114,7 +1114,7 @@ def test_borrowed_accent_accepts_a_current_direction_and_records_provenance():
     with isolated_plugin() as plugin:
         generate(plugin, [base, borrowed, third])
         update_success(plugin, {"action": "try", "directions": {"color": "base"}})
-        result = json.loads(plugin.update_choice({"action": "adjust", "path": "color.accent", "value": "#F26B1D", "source": "direction", "from_direction": "Daylight Almanac"}, session_id="one"))
+        result = json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": "color.accent", "value": "#F26B1D", "source": "direction", "from_direction": "Daylight Almanac"}, session_id="one"))
         assert result["ok"] is True
         assert result["state"]["adjustments"]["color.accent"] == {"value": "#F26B1D", "source": "direction", "from_direction": "dir-b"}
         assert result["next"] == plugin._NEXT_CHANGED
@@ -1129,7 +1129,7 @@ def test_borrowed_accent_survives_approval_and_is_credited_in_export():
         borrowed = update_success(plugin, {"action": "adjust", "path": "color.accent", "value": "#4E6B2F", "source": "direction", "from_direction": "Field Notes"})
         confirm(plugin, "approve warm briefing"); approved = update_success(plugin, {"action": "approve_direction", "direction": "Warm Briefing", "confirmed_by_user": "approve warm briefing"})
         assert approved["state"]["adjustments"]["color.accent"] == borrowed["state"]["adjustments"]["color.accent"]
-        confirm(plugin, "export it"); document = json.loads(plugin.export_design_md({"confirmed_by_user":"export it"}, session_id="one"))["design_md"]
+        confirm(plugin, "export it"); document = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user":"export it"}, session_id="one"))["design_md"]
         pane = json.loads(plugin.design_discovery_get_state({}, session_id="one"))["resolved_working"]
         assert pane["tokens"]["color"]["accent"] == "#4E6B2F"
         assert "Primary action color: from Field Notes, your choice." in document and "dir-b" not in document
@@ -1139,7 +1139,7 @@ def test_borrowed_accent_refuses_values_outside_current_directions():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
         update_success(plugin, {"action": "try", "directions": {"color": "one"}})
-        refused = json.loads(plugin.update_choice({"action": "adjust", "path": "color.accent", "value": "#FFFFFF", "source": "direction", "from_direction": "one"}, session_id="one"))
+        refused = json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": "color.accent", "value": "#FFFFFF", "source": "direction", "from_direction": "one"}, session_id="one"))
         assert refused["ok"] is True and "error" not in refused and refused["changes"] == []
         assert refused["next"].startswith("Nothing changed. '#FFFFFF' is not one of One's accent colors. Its accent is #")
 
@@ -1223,7 +1223,7 @@ def test_unresolvable_direction_reference_gives_guidance_and_changes_nothing():
         generate(plugin, varied_directions())
         update_success(plugin, {"action": "try", "directions": {"color": "1"}})
         before = state.get_state("one")
-        result = json.loads(plugin.update_choice({"action": "try", "directions": {"color": "something cozy"}}, session_id="one"))
+        result = json.loads(plugin.design_discovery_update_choice({"action": "try", "directions": {"color": "something cozy"}}, session_id="one"))
         assert result["ok"] is True and "error" not in result
         assert result["changes"] == [] and result["changed"] is False
         assert "1 (One, dir-a), 2 (Two, dir-b), 3 (Three, dir-c)" in result["next"] and 'Example call: {"action":"try"' in result["next"]
@@ -1238,11 +1238,11 @@ def test_wrong_borrowed_accent_names_the_right_hex_and_following_it_borrows():
         saved = state.get_state("one")
         source = next(item for item in saved["directions"] if item["id"] == "dir-c")
         accent = design_core.resolve_direction(source)["color"]["accent"]
-        result = json.loads(plugin.update_choice({"action": "adjust", "path": "color.accent", "value": "#123456", "source": "direction", "from_direction": "color from option 3"}, session_id="one"))
+        result = json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": "color.accent", "value": "#123456", "source": "direction", "from_direction": "color from option 3"}, session_id="one"))
         assert result["ok"] is True and "error" not in result and result["changes"] == []
         assert "Its accent is " + accent in result["next"]
         assert state.get_state("one") == saved
-        call = json.loads(result["next"].split("call update_choice with ", 1)[1].rstrip("."))
+        call = json.loads(result["next"].split("call design_discovery_update_choice with ", 1)[1].rstrip("."))
         assert call == {"action": "adjust", "path": "color.accent", "value": accent, "source": "direction", "from_direction": "dir-c"}
         borrowed = update_success(plugin, call)
         assert borrowed["state"]["adjustments"]["color.accent"]["value"] == accent
@@ -1269,14 +1269,14 @@ def test_borrowed_accent_recomputes_text_and_usage_for_all_contrast_cases():
 def test_skill_manage_is_blocked_during_an_active_design_session():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
-        assert plugin.pre_tool_call(tool_name="skill_manage", session_id="one") == {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported. If the user wants to stop designing or do something else, call update_choice with action end."}
+        assert plugin.pre_tool_call(tool_name="skill_manage", session_id="one") == {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported. If the user wants to stop designing or do something else, call design_discovery_update_choice with action end."}
 
 
 def test_lock_fills_unset_dimensions_from_its_direction():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
         confirm(plugin, "I approve this direction")
-        locked = json.loads(plugin.update_choice({"action": "lock", "dimension": "color", "direction_id": "one", "confirmed_by_user": "I approve this direction"}, session_id="one"))
+        locked = json.loads(plugin.design_discovery_update_choice({"action": "lock", "dimension": "color", "direction_id": "one", "confirmed_by_user": "I approve this direction"}, session_id="one"))
         assert locked["ok"] is True
         assert locked["state"]["working"]["color"]["status"] == "locked"
         assert all(item["source"] for item in locked["state"]["working"].values())
@@ -1290,7 +1290,7 @@ def test_borrowed_accent_fills_an_unset_working_mix():
         generated = json.loads(generate(plugin, [direction(), borrowed]))
         borrowed_stored = next(item for item in generated["state"]["directions"] if item["label"] == "Borrowed")
         accent = design_core.resolve_direction(borrowed_stored)["color"]["accent"]
-        adjusted = json.loads(plugin.update_choice({"action": "adjust", "path": "color.accent", "value": accent, "source": "direction", "from_direction": "Borrowed"}, session_id="one"))
+        adjusted = json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": "color.accent", "value": accent, "source": "direction", "from_direction": "Borrowed"}, session_id="one"))
         assert adjusted["ok"] is True
         assert adjusted["state"]["working"]["color"]["direction_id"] == "dir-b"
         assert all(item["source"] for item in adjusted["state"]["working"].values())
@@ -1302,17 +1302,17 @@ def test_lock_requires_confirmation_after_the_dimension_was_last_changed():
         generate(plugin, [direction()])
         confirm(plugin, "yes")
         update_success(plugin, {"action": "try", "directions": {"color": "one"}})
-        refused = json.loads(plugin.update_choice({"action": "lock", "dimension": "color", "confirmed_by_user": "yes"}, session_id="one"))
+        refused = json.loads(plugin.design_discovery_update_choice({"action": "lock", "dimension": "color", "confirmed_by_user": "yes"}, session_id="one"))
         assert refused["ok"] is False
         assert refused["next"] == "The user hasn’t seen this yet. Use try to show it, tell them the pane shows it, and wait for their reply."
         confirm(plugin, "yes, I have seen it")
-        assert json.loads(plugin.update_choice({"action": "lock", "dimension": "color", "confirmed_by_user": "yes, I have seen it"}, session_id="one"))["ok"] is True
+        assert json.loads(plugin.design_discovery_update_choice({"action": "lock", "dimension": "color", "confirmed_by_user": "yes, I have seen it"}, session_id="one"))["ok"] is True
 
 
 def test_file_reads_and_searches_are_blocked_during_an_active_design_session():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
-        expected = {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported. If the user wants to stop designing or do something else, call update_choice with action end."}
+        expected = {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported. If the user wants to stop designing or do something else, call design_discovery_update_choice with action end."}
         assert plugin.pre_tool_call(tool_name="read_file", session_id="one") == expected
         assert plugin.pre_tool_call(tool_name="search_files", session_id="one") == expected
 
@@ -1320,10 +1320,10 @@ def test_file_reads_and_searches_are_blocked_during_an_active_design_session():
 def test_design_tools_refuse_unknown_arguments():
     with isolated_plugin() as plugin:
         calls = [
-            (plugin.record_understanding, {"summary": "A summary.", "unexpected": True}),
-            (plugin.generate_directions, {"directions": [], "answers": ANSWERS, "confirmed_by_user": "yes", "unexpected": True}),
+            (plugin.design_discovery_record_understanding, {"summary": "A summary.", "unexpected": True}),
+            (plugin.design_discovery_generate_directions, {"directions": [], "answers": ANSWERS, "confirmed_by_user": "yes", "unexpected": True}),
             (plugin.design_discovery_get_state, {"unexpected": True}),
-            (plugin.export_design_md, {"confirmed_by_user": "yes", "unexpected": True}),
+            (plugin.design_discovery_export_design_md, {"confirmed_by_user": "yes", "unexpected": True}),
         ]
         for tool, args in calls:
             refused = json.loads(tool(args, session_id="one"))
@@ -1338,7 +1338,7 @@ def test_each_update_choice_action_refuses_unknown_arguments():
             args = {"action": action, "unexpected": True}
             if action == "lock":
                 args = {"action": action, "dimension": "color", "accent": "orange"}
-            refused = json.loads(plugin.update_choice(args, session_id="one"))
+            refused = json.loads(plugin.design_discovery_update_choice(args, session_id="one"))
             expected = "accent" if action == "lock" else "unexpected"
             assert refused["error"] == f"unexpected argument: {expected}"
             assert refused["next"] != plugin._NEXT_GENERIC_REFUSAL
@@ -1360,7 +1360,7 @@ def test_described_accent_uses_recorded_user_words_and_pane_provenance():
         generate(plugin, [base])
         update_success(plugin, {"action": "try", "directions": {"color": "One"}})
         plugin.pre_llm_call(session_id="one", user_message="Make it bright orange, like a tangerine!")
-        adjusted = json.loads(plugin.update_choice({"action": "adjust", "path": "color.accent", "value": "#2F4656", "source": "described", "user_words": "bright orange like a tangerine"}, session_id="one"))
+        adjusted = json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": "color.accent", "value": "#2F4656", "source": "described", "user_words": "bright orange like a tangerine"}, session_id="one"))
         assert adjusted["ok"] is True
         assert adjusted["next"]
         assert adjusted["state"]["adjustments"]["color.accent"] == {"value": "#2F4656", "source": "described", "user_words": "bright orange like a tangerine"}, adjusted
@@ -1373,7 +1373,7 @@ def test_described_accent_refuses_words_not_recorded_from_the_user():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
         update_success(plugin, {"action": "try", "directions": {"color": "one"}})
-        refused = json.loads(plugin.update_choice({"action": "adjust", "path": "color.accent", "value": "#F26B1D", "source": "described", "user_words": "bright orange like a tangerine"}, session_id="one"))
+        refused = json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": "color.accent", "value": "#F26B1D", "source": "described", "user_words": "bright orange like a tangerine"}, session_id="one"))
         assert refused["ok"] is False
         assert refused["error"] == "described color words must come from the user"
 
@@ -1384,9 +1384,9 @@ def test_confirmation_matches_normalized_contiguous_user_text():
         plugin.pre_llm_call(session_id="one", user_message="I need a calm dashboard.")
         plugin.post_llm_call(session_id="one", assistant_response="What should it help people do?")
         plugin.pre_llm_call(session_id="one", user_message="Help people see the morning status.")
-        plugin.record_understanding({"summary": "You want a calm dashboard in two plain sentences."}, session_id="one")
+        plugin.design_discovery_record_understanding({"summary": "You want a calm dashboard in two plain sentences."}, session_id="one")
         plugin.pre_llm_call(session_id="one", user_message="Yes — that is right, please generate them.")
-        accepted = json.loads(plugin.generate_directions({"directions": directions, "answers": ANSWERS, "confirmed_by_user": "that is right"}, session_id="one"))
+        accepted = json.loads(plugin.design_discovery_generate_directions({"directions": directions, "answers": ANSWERS, "confirmed_by_user": "that is right"}, session_id="one"))
         assert accepted["ok"] is True
 
 
@@ -1394,16 +1394,16 @@ def test_understanding_confirmation_mismatch_names_the_user_reply_requirement():
     with isolated_plugin() as plugin:
         directions = [direction() for _ in range(3)]
         interview_reply(plugin)
-        plugin.record_understanding({"summary": "You want a calm dashboard in two plain sentences."}, session_id="one")
+        plugin.design_discovery_record_understanding({"summary": "You want a calm dashboard in two plain sentences."}, session_id="one")
         plugin.pre_llm_call(session_id="one", user_message="No, make it brighter.")
-        refused = json.loads(plugin.generate_directions({"directions": directions, "answers": ANSWERS, "confirmed_by_user": "yes"}, session_id="one"))
+        refused = json.loads(plugin.design_discovery_generate_directions({"directions": directions, "answers": ANSWERS, "confirmed_by_user": "yes"}, session_id="one"))
         assert refused["next"] == "Pass the user’s reply exactly as they wrote it as confirmed_by_user."
 
 
 def test_adjust_before_try_fills_working_state_and_persists_accent_in_pane():
     with isolated_plugin() as plugin:
         generate(plugin, [direction(accent=None)])
-        adjusted = json.loads(plugin.update_choice({"action": "adjust", "path": "color.accent", "value": "#4E5A3A", "source": "agent"}, session_id="one"))
+        adjusted = json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": "color.accent", "value": "#4E5A3A", "source": "agent"}, session_id="one"))
         assert adjusted["next"] == plugin._NEXT_CHANGED
         assert adjusted["state"]["adjustments"]["color.accent"] == {"value": "#4E5A3A", "source": "agent"}
         assert all(item["source"] for item in adjusted["state"]["working"].values())
@@ -1432,7 +1432,7 @@ def test_adjust_refuses_invalid_accent_variants_without_saving_or_success_next()
         with isolated_plugin() as plugin:
             generate(plugin, [direction(accent=None)])
             plugin.pre_llm_call(session_id="one", user_message="Make it bright orange")
-            refused = json.loads(plugin.update_choice({"action": "adjust", **args}, session_id="one"))
+            refused = json.loads(plugin.design_discovery_update_choice({"action": "adjust", **args}, session_id="one"))
             assert refused["ok"] is False
             assert refused["next"]
             assert state.get_state("one")["adjustments"] == {}
@@ -1443,7 +1443,7 @@ def test_try_keeps_adjustments_for_dimensions_it_does_not_change():
     with isolated_plugin() as plugin:
         generate(plugin, [direction(accent=None), second])
         update_success(plugin, {"action": "adjust", "path": "color.accent", "value": "#4E5A3A", "source": "agent"})
-        tried = json.loads(plugin.update_choice({"action": "try", "directions": {"typography": "Second choice"}}, session_id="one"))
+        tried = json.loads(plugin.design_discovery_update_choice({"action": "try", "directions": {"typography": "Second choice"}}, session_id="one"))
         assert tried["state"]["adjustments"]["color.accent"] == {"value": "#4E5A3A", "source": "agent"}
 
 
@@ -1454,15 +1454,15 @@ def test_record_understanding_uses_visible_summary_before_latest_user_reply_only
         interview_reply(plugin)
         plugin.post_llm_call(session_id="one", assistant_response="You want a warm morning dashboard that shows which agents failed overnight, without a generic SaaS feel. Is that right?")
         plugin.pre_llm_call(session_id="one", user_message="Thats correct. Generate the directions please")
-        recorded = json.loads(plugin.record_understanding({"summary": summary}, session_id="one"))
-        assert recorded["next"] == "The understanding is already confirmed. Call generate_directions with the user’s reply as confirmed_by_user. Do not call record_understanding again."
-        assert json.loads(plugin.generate_directions(request, session_id="one"))["next"].startswith("Describe each direction")
+        recorded = json.loads(plugin.design_discovery_record_understanding({"summary": summary}, session_id="one"))
+        assert recorded["next"] == "The understanding is already confirmed. Call design_discovery_generate_directions with the user’s reply as confirmed_by_user. Do not call design_discovery_record_understanding again."
+        assert json.loads(plugin.design_discovery_generate_directions(request, session_id="one"))["next"].startswith("Describe each direction")
     with isolated_plugin() as plugin:
         interview_reply(plugin)
         plugin.pre_llm_call(session_id="one", user_message="Thats correct. Generate the directions please")
-        recorded = json.loads(plugin.record_understanding({"summary": summary}, session_id="one"))
+        recorded = json.loads(plugin.design_discovery_record_understanding({"summary": summary}, session_id="one"))
         assert recorded["next"] == "Show the user this summary in your own words and ask if it’s right. Then stop and wait for their reply."
-        waiting = json.loads(plugin.generate_directions(request, session_id="one"))
+        waiting = json.loads(plugin.design_discovery_generate_directions(request, session_id="one"))
         assert waiting["next"] == "The user hasn’t replied yet. Show them your understanding and wait for their reply."
 
 
@@ -1470,17 +1470,17 @@ def test_generic_quoted_yes_generates_but_scripted_specific_phrase_is_refused():
     request = {"directions": varied_directions(), "answers": ANSWERS, "confirmed_by_user": "Yes"}
     with isolated_plugin() as plugin:
         interview_reply(plugin)
-        plugin.record_understanding({"summary": "You want a calm dashboard in two plain sentences."}, session_id="one")
+        plugin.design_discovery_record_understanding({"summary": "You want a calm dashboard in two plain sentences."}, session_id="one")
         plugin.post_llm_call(session_id="one", assistant_response='A quick "yes" and I will generate the directions.')
         plugin.pre_llm_call(session_id="one", user_message="Yes")
-        accepted = json.loads(plugin.generate_directions(request, session_id="one"))
+        accepted = json.loads(plugin.design_discovery_generate_directions(request, session_id="one"))
         assert accepted["next"].startswith("Describe each direction")
     with isolated_plugin() as plugin:
         interview_reply(plugin)
-        plugin.record_understanding({"summary": "You want a calm dashboard in two plain sentences."}, session_id="one")
+        plugin.design_discovery_record_understanding({"summary": "You want a calm dashboard in two plain sentences."}, session_id="one")
         plugin.post_llm_call(session_id="one", assistant_response='Say "lock the warm palette" to approve it.')
         plugin.pre_llm_call(session_id="one", user_message="lock the warm palette")
-        refused = json.loads(plugin.generate_directions({**request, "confirmed_by_user": "lock the warm palette"}, session_id="one"))
+        refused = json.loads(plugin.design_discovery_generate_directions({**request, "confirmed_by_user": "lock the warm palette"}, session_id="one"))
         assert refused["next"] == "Ask the user in your own words whether they approve. Do not suggest how to reply, then wait."
 
 
@@ -1504,12 +1504,12 @@ def test_generate_assigns_stable_direction_ids_and_accepts_labels_for_selection(
             generated = json.loads(generate(plugin, choices))
             assert [item["id"] for item in generated["state"]["directions"]] == ["dir-a", "dir-b", "dir-c"]
             assert generated["next"].endswith("Use these direction ids for try and lock: dir-a (Morning Ritual), dir-b (Warm Signal), dir-c (Playful Dispatch).")
-            tried = json.loads(plugin.update_choice({"action": "try", "directions": {"color": "Warm Signal"}}, session_id="one"))
+            tried = json.loads(plugin.design_discovery_update_choice({"action": "try", "directions": {"color": "Warm Signal"}}, session_id="one"))
             assert tried["state"]["working"]["color"]["direction_id"] == "dir-b"
-            unknown = json.loads(plugin.update_choice({"action": "try", "directions": {"color": "unknown"}}, session_id="one"))
+            unknown = json.loads(plugin.design_discovery_update_choice({"action": "try", "directions": {"color": "unknown"}}, session_id="one"))
             assert unknown["next"] == "Nothing changed. The direction reference 'unknown' did not match one direction. Use a number, label or id from this list: 1 (Morning Ritual, dir-a), 2 (Warm Signal, dir-b), 3 (Playful Dispatch, dir-c). Example call: {\"action\":\"try\",\"directions\":{\"color\":\"2\"}}"
             confirm(plugin, "lock warm signal")
-            locked = json.loads(plugin.update_choice({"action": "lock", "dimension": "color", "direction_id": "Warm Signal", "confirmed_by_user": "lock warm signal"}, session_id="one"))
+            locked = json.loads(plugin.design_discovery_update_choice({"action": "lock", "dimension": "color", "direction_id": "Warm Signal", "confirmed_by_user": "lock warm signal"}, session_id="one"))
             assert locked["state"]["working"]["color"]["direction_id"] == "dir-b"
             api = dashboard_api()
             assert len(api.resolved_state("one")["resolved_directions"]) == 3
@@ -1522,9 +1522,9 @@ def test_generate_refuses_directions_that_are_too_similar_in_color():
         plugin.pre_llm_call(session_id="one", user_message="A dashboard")
         plugin.post_llm_call(session_id="one", assistant_response="What should this dashboard help people do?")
         plugin.pre_llm_call(session_id="one", user_message="Help people compare the daily status.")
-        plugin.record_understanding({"summary": "You want a dashboard with a clear design direction."}, session_id="one")
+        plugin.design_discovery_record_understanding({"summary": "You want a dashboard with a clear design direction."}, session_id="one")
         plugin.pre_llm_call(session_id="one", user_message="yes")
-        refused = json.loads(plugin.generate_directions({"directions": choices, "answers": ANSWERS, "confirmed_by_user": "yes"}, session_id="one"))
+        refused = json.loads(plugin.design_discovery_generate_directions({"directions": choices, "answers": ANSWERS, "confirmed_by_user": "yes"}, session_id="one"))
         assert refused["ok"] is True and refused["generated"] is False and refused["status"] == "needs_changes"
         assert refused["next"].startswith("Nothing was generated and the pane is unchanged.")
         assert "Morning Clay" in refused["guidance"] and "Afternoon Clay" in refused["guidance"]
@@ -1541,10 +1541,10 @@ def test_described_accent_enforces_contrast_before_persisting_and_shared_accent_
         generate(plugin, [first, second])
         update_success(plugin, {"action": "try", "directions": {"color": "One"}})
         plugin.pre_llm_call(session_id="one", user_message="Make it orange")
-        shared = json.loads(plugin.update_choice({"action": "adjust", "path": "color.accent", "value": "#7A4A1E", "source": "direction", "from_direction": "Second"}, session_id="one"))
+        shared = json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": "color.accent", "value": "#7A4A1E", "source": "direction", "from_direction": "Second"}, session_id="one"))
         assert shared["ok"] is True and shared["changed"] is False and shared["changes"] == [] and "error" not in shared
         assert shared["next"] == plugin._NEXT_NO_CHANGE
-        vague = json.loads(plugin.update_choice({"action": "adjust", "path": "color.accent", "value": "orange", "source": "agent"}, session_id="one"))
+        vague = json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": "color.accent", "value": "orange", "source": "agent"}, session_id="one"))
         assert vague["next"] == "Use source described, put the user's color words in user_words, and pass a matching #RRGGBB hex as value."
 
 
@@ -1554,7 +1554,7 @@ def test_described_accent_is_deepened_for_quiet_warmth_contrast():
         for number in range(100): plugin.post_llm_call(session_id="one", assistant_response="old update " + str(number))
         update_success(plugin, {"action": "try", "directions": {"color": "One"}})
         plugin.pre_llm_call(session_id="one", user_message="Make it orange")
-        adjusted = json.loads(plugin.update_choice({"action": "adjust", "path": "color.accent", "value": "#D4783C", "source": "described", "user_words": "orange"}, session_id="one"))
+        adjusted = json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": "color.accent", "value": "#D4783C", "source": "described", "user_words": "orange"}, session_id="one"))
         assert adjusted["ok"] is True
         accent = adjusted["state"]["adjustments"]["color.accent"]
         assert accent["value"] != "#D4783C" and accent["contrast_adjusted"] == "deepened"
@@ -1565,22 +1565,22 @@ def test_no_op_mutations_give_actionable_next_steps():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
         update_success(plugin, {"action": "try", "directions": {"color": "one"}})
-        repeated_try = json.loads(plugin.update_choice({"action": "try", "directions": {"color": "one"}}, session_id="one"))
+        repeated_try = json.loads(plugin.design_discovery_update_choice({"action": "try", "directions": {"color": "one"}}, session_id="one"))
         assert repeated_try["ok"] is True and repeated_try["changed"] is False
         assert repeated_try["next"] == plugin._NEXT_ALREADY_SHOWN
         confirm(plugin, "lock it")
         update_success(plugin, {"action": "lock", "dimension": "color", "direction_id": "one", "confirmed_by_user": "lock it"})
         before_events = json.loads(plugin.design_discovery_get_state({}, session_id="one"))["state"]["message_events"]
-        repeated_lock = json.loads(plugin.update_choice({"action": "lock", "dimension": "color", "direction_id": "one", "confirmed_by_user": "lock it"}, session_id="one"))
+        repeated_lock = json.loads(plugin.design_discovery_update_choice({"action": "lock", "dimension": "color", "direction_id": "one", "confirmed_by_user": "lock it"}, session_id="one"))
         assert repeated_lock["next"] == plugin._NEXT_ALREADY_LOCKED
         after_events = json.loads(plugin.design_discovery_get_state({}, session_id="one"))["state"]["message_events"]
         assert after_events == before_events
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
         update_success(plugin, {"action": "try", "directions": {"color": "one"}})
-        repeated_unlock = json.loads(plugin.update_choice({"action": "unlock", "dimension": "color", "direction_id": "one"}, session_id="one"))
+        repeated_unlock = json.loads(plugin.design_discovery_update_choice({"action": "unlock", "dimension": "color", "direction_id": "one"}, session_id="one"))
         assert repeated_unlock["next"] == plugin._NEXT_ALREADY_UNLOCKED
-        missing_adjustment = json.loads(plugin.update_choice({"action": "adjust", "path": "motion.preset", "value": None}, session_id="one"))
+        missing_adjustment = json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": "motion.preset", "value": None}, session_id="one"))
         assert missing_adjustment["ok"] is True and missing_adjustment["changed"] is False and "error" not in missing_adjustment
         assert missing_adjustment["next"] == "Nothing to remove; the pane is unchanged."
 
@@ -1589,20 +1589,20 @@ def test_approve_direction_locks_an_untried_label_and_exports():
     with isolated_plugin() as plugin:
         generate(plugin, [direction(accent=None)])
         confirm(plugin, "I am happy with One, finish it")
-        approved = json.loads(plugin.update_choice({"action": "approve_direction", "direction": "One", "confirmed_by_user": "I am happy with One, finish it"}, session_id="one"))
+        approved = json.loads(plugin.design_discovery_update_choice({"action": "approve_direction", "direction": "One", "confirmed_by_user": "I am happy with One, finish it"}, session_id="one"))
         assert approved["ok"] is True
         assert all(item["status"] == "locked" for item in approved["state"]["working"].values())
         confirm(plugin, "export the final direction")
-        exported = json.loads(plugin.export_design_md({"confirmed_by_user": "export the final direction"}, session_id="one"))
+        exported = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "export the final direction"}, session_id="one"))
         assert exported["ok"] is True
 
 
 def test_direction_ordinals_are_accepted_and_bad_try_entries_are_specific():
     with isolated_plugin() as plugin:
         generated = json.loads(generate(plugin, [direction(accent=None)]))
-        tried = json.loads(plugin.update_choice({"action": "try", "directions": {"color": "option 1"}}, session_id="one"))
+        tried = json.loads(plugin.design_discovery_update_choice({"action": "try", "directions": {"color": "option 1"}}, session_id="one"))
         assert tried["ok"] is True and tried["state"]["working"]["color"]["direction_id"] == "dir-a"
-        malformed = json.loads(plugin.update_choice({"action": "try", "directions": {"colour": 1}}, session_id="one"))
+        malformed = json.loads(plugin.design_discovery_update_choice({"action": "try", "directions": {"colour": 1}}, session_id="one"))
         assert "'colour'=1" in malformed["error"] and "typography" in malformed["error"]
 
 
@@ -1631,7 +1631,7 @@ def test_approve_direction_preserves_unlocked_described_accent_and_export_run_se
         pane = json.loads(plugin.design_discovery_get_state({}, session_id="one"))["resolved_working"]
         assert pane["tokens"]["color"]["accent"] == "#C05A16"
         confirm(plugin, "export it")
-        document = json.loads(plugin.export_design_md({"confirmed_by_user": "export it"}, session_id="one"))["design_md"]
+        document = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "export it"}, session_id="one"))["design_md"]
         assert "Primary action color: bright orange, your choice." in document and "#C05A16" in document
 
 
@@ -1640,10 +1640,10 @@ def test_color_value_refusals_are_specific_and_unknown_sources_are_lenient():
         generate(plugin, [direction(accent=None)])
         plugin.pre_llm_call(session_id="one", user_message="bright orange")
         for value in ("bright orange", "#123", "#bright orange"):
-            refused = json.loads(plugin.update_choice({"action": "adjust", "path": "color.accent", "value": value, "source": "described", "user_words": "bright orange"}, session_id="one"))
+            refused = json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": "color.accent", "value": value, "source": "described", "user_words": "bright orange"}, session_id="one"))
             assert refused["next"] != plugin._NEXT_GENERIC_REFUSAL and "user_words" in refused["next"]
         for source in ("agent", "user"):
-            refused = json.loads(plugin.update_choice({"action": "adjust", "path": "color.accent", "value": "bright orange", "source": source}, session_id="one"))
+            refused = json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": "color.accent", "value": "bright orange", "source": source}, session_id="one"))
             assert refused["next"] == "Use source described, put the user's color words in user_words, and pass a matching #RRGGBB hex as value."
         for dimension in design_core.DIMENSIONS:
             invalid = direction(); invalid["sources"][dimension] = "structured"
@@ -1664,7 +1664,7 @@ def test_design_md_brief_uses_skill_command_remainder_or_next_user_message():
 def test_active_session_allowlist_and_post_export_release():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
-        blocked = {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported. If the user wants to stop designing or do something else, call update_choice with action end."}
+        blocked = {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported. If the user wants to stop designing or do something else, call design_discovery_update_choice with action end."}
         assert plugin.pre_tool_call(tool_name="computer_use", session_id="one") == blocked
         assert plugin.pre_tool_call(tool_name="terminal", session_id="one") == blocked
         assert plugin.pre_tool_call(tool_name="tool_search", session_id="one") is None
@@ -1673,7 +1673,7 @@ def test_active_session_allowlist_and_post_export_release():
         assert plugin.pre_tool_call(tool_name="computer_use", session_id="missing") is None
         lock_all(plugin)
         confirm(plugin, "export it")
-        json.loads(plugin.export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
+        json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
         assert plugin.pre_tool_call(tool_name="computer_use", session_id="one") is None
 
 
@@ -1688,10 +1688,10 @@ def test_end_releases_an_active_session_and_is_a_successful_inactive_no_op():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
         assert plugin.pre_tool_call(tool_name="terminal", session_id="one")["action"] == "block"
-        ended = json.loads(plugin.update_choice({"action": "end"}, session_id="one"))
+        ended = json.loads(plugin.design_discovery_update_choice({"action": "end"}, session_id="one"))
         assert ended["ok"] is True and ended["state"]["active"] is False
         assert plugin.pre_tool_call(tool_name="terminal", session_id="one") is None
-        inactive = json.loads(plugin.update_choice({"action": "end"}, session_id="one"))
+        inactive = json.loads(plugin.design_discovery_update_choice({"action": "end"}, session_id="one"))
         assert inactive["ok"] is True and inactive["changed"] is False and inactive["changes"] == []
 
 
@@ -1722,10 +1722,10 @@ def test_tool_event_log_is_redacted_and_session_scoped():
             def register_hook(self, *args): pass
             def register_skill(self, *args): pass
         context = Context(); plugin.register(context)
-        result = context.handlers["record_understanding"]({"summary": "private summary"}, session_id="one")
+        result = context.handlers["design_discovery_record_understanding"]({"summary": "private summary"}, session_id="one")
         assert json.loads(result)["ok"] is True
         event = json.loads(state.tool_events_path("one").read_text(encoding="utf-8").splitlines()[-1])
-        assert event["tool"] == "record_understanding" and "private summary" not in json.dumps(event)
+        assert event["tool"] == "design_discovery_record_understanding" and "private summary" not in json.dumps(event)
         assert not state.tool_events_path("two").exists()
 
 
@@ -1737,7 +1737,7 @@ def test_generate_event_logs_composed_hex_values_without_user_prose():
             def register_skill(self, *args): pass
         context = Context(); plugin.register(context)
         confirmation = confirmed_understanding(plugin)
-        result = json.loads(context.generate_directions({"directions": composed_triplet(), "answers": ANSWERS, "confirmed_by_user": confirmation}, session_id="one"))
+        result = json.loads(context.design_discovery_generate_directions({"directions": composed_triplet(), "answers": ANSWERS, "confirmed_by_user": confirmation}, session_id="one"))
         assert result["ok"] is True
         event = json.loads(state.tool_events_path("one").read_text(encoding="utf-8").splitlines()[-1])
         palette = event["args"]["directions"][0]["composed_palette"]
@@ -1753,14 +1753,14 @@ def test_export_writes_design_md_with_path_families_and_described_decision():
         update_success(plugin, {"action": "adjust", "path": "color.accent", "value": "#D4783C", "source": "described", "user_words": "orange, like a tangerine"})
         lock_all(plugin)
         confirm(plugin, "export it")
-        exported = json.loads(plugin.export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
+        exported = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
         path = Path(exported["design_md_path"])
         assert path.read_text(encoding="utf-8") == exported["design_md"] and state.design_md_path("one").read_text(encoding="utf-8") == exported["design_md"]
         assert "Primary action color: orange, like a tangerine, your choice. Deepened slightly so it stays readable." in exported["design_md"]
         assert "--font-display:" in exported["design_md"] and "--font-body:" in exported["design_md"] and "figtree" not in exported["design_md"]
         assert "https://fonts.googleapis.com/css2?family=" in exported["design_md"]
         confirm(plugin, "export again")
-        again = json.loads(plugin.export_design_md({"confirmed_by_user": "export again"}, session_id="one"))
+        again = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "export again"}, session_id="one"))
         assert again["design_md_path"] == exported["design_md_path"] and path.read_text(encoding="utf-8") == again["design_md"]
 
 
@@ -1809,14 +1809,14 @@ def test_fill_only_described_accent_uses_three_to_one_in_pane_and_design_md():
             confirm(plugin, "lock " + dimension)
             update_success(plugin, {"action": "lock", "dimension": dimension, "direction_id": "Garden Watch", "confirmed_by_user": "lock " + dimension})
         confirm(plugin, "export it")
-        document = json.loads(plugin.export_design_md({"confirmed_by_user": "export it"}, session_id="one"))["design_md"]
+        document = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "export it"}, session_id="one"))["design_md"]
         assert "| accent on background | 3.9:1 | 3.0:1 | Pass |" in document
 
 
 def test_final_pane_payload_carries_exported_content():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()]); lock_all(plugin); confirm(plugin, "export it")
-        exported = json.loads(plugin.export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
+        exported = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
         api = dashboard_api()
         payload = api.resolved_state("one")
         assert payload["phase"] == "final" and payload["design_md"] == exported["design_md"]
@@ -1830,21 +1830,21 @@ def test_lock_scope_and_export_confirmation_are_recorded_without_user_text():
             def register_hook(self, *args): pass
             def register_skill(self, *args): pass
         context = Context(); plugin.register(context); generate(plugin, [direction(accent=None)])
-        assert json.loads(context.handlers["update_choice"]({"action": "try", "directions": {"color": "One"}}, session_id="one"))["ok"]
+        assert json.loads(context.handlers["design_discovery_update_choice"]({"action": "try", "directions": {"color": "One"}}, session_id="one"))["ok"]
         plugin.pre_llm_call(session_id="one", user_message="Make it orange, like a tangerine")
-        assert json.loads(context.handlers["update_choice"]({"action": "adjust", "path": "color.accent", "value": "#D4783C", "source": "described", "user_words": "orange, like a tangerine"}, session_id="one"))["ok"]
+        assert json.loads(context.handlers["design_discovery_update_choice"]({"action": "adjust", "path": "color.accent", "value": "#D4783C", "source": "described", "user_words": "orange, like a tangerine"}, session_id="one"))["ok"]
         approval = "Yes I like that. Lets lock it in"
         confirm(plugin, approval)
-        assert json.loads(context.handlers["update_choice"]({"action": "lock", "dimension": "color", "direction_id": "one", "confirmed_by_user": approval}, session_id="one"))["ok"]
-        refused = json.loads(context.handlers["update_choice"]({"action": "lock", "dimension": "typography", "direction_id": "one", "confirmed_by_user": approval}, session_id="one"))
+        assert json.loads(context.handlers["design_discovery_update_choice"]({"action": "lock", "dimension": "color", "direction_id": "one", "confirmed_by_user": approval}, session_id="one"))["ok"]
+        refused = json.loads(context.handlers["design_discovery_update_choice"]({"action": "lock", "dimension": "typography", "direction_id": "one", "confirmed_by_user": approval}, session_id="one"))
         assert refused["ok"] is False and "remaining dimensions" in refused["next"]
         confirm(plugin, "approve the rest")
-        assert json.loads(context.handlers["update_choice"]({"action": "approve_direction", "direction": "One", "confirmed_by_user": "approve the rest"}, session_id="one"))["ok"]
-        stale = json.loads(context.handlers["export_design_md"]({"confirmed_by_user": "approve the rest"}, session_id="one"))
+        assert json.loads(context.handlers["design_discovery_update_choice"]({"action": "approve_direction", "direction": "One", "confirmed_by_user": "approve the rest"}, session_id="one"))["ok"]
+        stale = json.loads(context.handlers["design_discovery_export_design_md"]({"confirmed_by_user": "approve the rest"}, session_id="one"))
         assert stale["ok"] is True and stale["exported"] is False and "error" not in stale
         assert stale["next"] == "Summarize the final direction in plain words and ask what they think, then wait."
         confirm(plugin, "export it")
-        assert json.loads(context.handlers["export_design_md"]({"confirmed_by_user": "export it"}, session_id="one"))["ok"]
+        assert json.loads(context.handlers["design_discovery_export_design_md"]({"confirmed_by_user": "export it"}, session_id="one"))["ok"]
         events = state.tool_events_path("one").read_text(encoding="utf-8")
         assert '"message_event_id":' in events and '"scope":["color"]' in events and '"scope":"export"' in events and approval not in events and "export it" not in events
 
@@ -1883,8 +1883,8 @@ def test_summary_detection_skips_confirmation_events_between_visible_messages():
         state_value = state.get_state("one")
         plugin._record_confirmation(state_value, plugin._confirmation(state_value, "Yes, that is right"), ["color"], "lock_confirmation")
         state.replace_state(state_value, "one")
-        recorded = json.loads(plugin.record_understanding({"summary": "You want a calm dashboard for people who need clarity."}, session_id="one"))
-        assert recorded["next"] == "The understanding is already confirmed. Call generate_directions with the user’s reply as confirmed_by_user. Do not call record_understanding again."
+        recorded = json.loads(plugin.design_discovery_record_understanding({"summary": "You want a calm dashboard for people who need clarity."}, session_id="one"))
+        assert recorded["next"] == "The understanding is already confirmed. Call design_discovery_generate_directions with the user’s reply as confirmed_by_user. Do not call design_discovery_record_understanding again."
 
 
 def test_confirmation_ids_survive_event_trimming_for_scope_and_export_freshness():
@@ -1895,15 +1895,15 @@ def test_confirmation_ids_survive_event_trimming_for_scope_and_export_freshness(
         update_success(plugin, {"action": "adjust", "path": "color.accent", "value": "#D4783C", "source": "described", "user_words": "orange"})
         confirm(plugin, "lock it")
         update_success(plugin, {"action": "lock", "dimension": "color", "confirmed_by_user": "lock it"})
-        refused = json.loads(plugin.update_choice({"action": "lock", "dimension": "typography", "confirmed_by_user": "lock it"}, session_id="one"))
+        refused = json.loads(plugin.design_discovery_update_choice({"action": "lock", "dimension": "typography", "confirmed_by_user": "lock it"}, session_id="one"))
         assert refused["error"] == "this approval already locked another dimension"
         confirm(plugin, "approve the rest")
         update_success(plugin, {"action": "approve_direction", "direction": "One", "confirmed_by_user": "approve the rest"})
-        stale = json.loads(plugin.export_design_md({"confirmed_by_user": "approve the rest"}, session_id="one"))
+        stale = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "approve the rest"}, session_id="one"))
         assert stale["ok"] is True and stale["exported"] is False and "error" not in stale
         assert stale["next"] == "Summarize the final direction in plain words and ask what they think, then wait."
         confirm(plugin, "export it")
-        assert json.loads(plugin.export_design_md({"confirmed_by_user": "export it"}, session_id="one"))["ok"] is True
+        assert json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "export it"}, session_id="one"))["ok"] is True
 
 
 def test_loading_idless_events_assigns_ids_in_order():
@@ -1927,11 +1927,11 @@ def test_state_write_retries_then_reports_persistent_storage_failure_without_par
             if calls["count"] <= 3: raise PermissionError("locked")
             return real_replace(source, destination)
         with patch.object(state.os, "replace", flaky):
-            assert json.loads(plugin.record_understanding({"summary": "A clear morning dashboard."}, session_id="one"))["ok"] is True
+            assert json.loads(plugin.design_discovery_record_understanding({"summary": "A clear morning dashboard."}, session_id="one"))["ok"] is True
         assert calls["count"] == 4 and state.get_state("one")["understanding"]["summary"] == "A clear morning dashboard."
         before = state.state_path("one").read_text(encoding="utf-8")
         with patch.object(state.os, "replace", side_effect=PermissionError("locked")):
-            refused = json.loads(plugin.record_understanding({"summary": "This must not save."}, session_id="one"))
+            refused = json.loads(plugin.design_discovery_record_understanding({"summary": "This must not save."}, session_id="one"))
         assert refused["ok"] is False and "temporary save error" in refused["next"]
         assert state.state_path("one").read_text(encoding="utf-8") == before
         assert not list(state.state_path("one").parent.glob("state.json.*.tmp"))
@@ -1949,7 +1949,7 @@ def test_every_invalid_enum_adjustment_is_lenient_and_names_all_accepted_values(
         update_success(plugin, {"action": "try", "directions": {"typography": "one"}})
         for path, kind in design_core.ADJUSTMENT_PATHS.items():
             if kind in design_core.enums():
-                result = json.loads(plugin.update_choice({"action": "adjust", "path": path, "value": "invalid-value", "source": "agent"}, session_id="one"))
+                result = json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": path, "value": "invalid-value", "source": "agent"}, session_id="one"))
                 warning = result["warnings"][0]
                 assert result["ok"] is True and result["changed"] is False and "error" not in result
                 assert path in warning and "invalid-value" in warning and "kept" in warning
@@ -1958,7 +1958,7 @@ def test_every_invalid_enum_adjustment_is_lenient_and_names_all_accepted_values(
 
 def test_defined_refusal_errors_never_use_generic_fallback():
     with isolated_plugin() as plugin:
-        messages = ["unknown action", "unknown dimension", "directions must map one or more dimensions to direction ids", "try a direction before changing an individual value", "directions are too similar in color: One and Two share a light ground. Give them a difference the user would notice.", "No directions have been generated yet. Call generate_directions first before referring to a direction.", "unsupported adjustment path", "no adjustment exists at path", "dimension is already locked", "dimension is already unlocked", "working direction is already shown", "described color words must come from the user", "agent-sourced accent must be from the color source alternates", "dimension has not been seen since its last change", "unexpected argument: bad", "composed palette text on background is 2:1; it needs 7:1. Make text darker.", "composed_palette must contain exactly background, surface, text, muted, border, border_strong, and accent as #RRGGBB values", 'Use sources.color "composed" for a composed palette. The plugin assigns the direction id.', "archetype color directions cannot also include composed_palette"]
+        messages = ["unknown action", "unknown dimension", "directions must map one or more dimensions to direction ids", "try a direction before changing an individual value", "directions are too similar in color: One and Two share a light ground. Give them a difference the user would notice.", "No directions have been generated yet. Call design_discovery_generate_directions first before referring to a direction.", "unsupported adjustment path", "no adjustment exists at path", "dimension is already locked", "dimension is already unlocked", "working direction is already shown", "described color words must come from the user", "agent-sourced accent must be from the color source alternates", "dimension has not been seen since its last change", "unexpected argument: bad", "composed palette text on background is 2:1; it needs 7:1. Make text darker.", "composed_palette must contain exactly background, surface, text, muted, border, border_strong, and accent as #RRGGBB values", 'Use sources.color "composed" for a composed palette. The plugin assigns the direction id.', "archetype color directions cannot also include composed_palette"]
         for message in messages:
             assert json.loads(plugin._refusal(ValueError(message)))["next"] != plugin._NEXT_GENERIC_REFUSAL
 
@@ -1982,7 +1982,7 @@ def _export_ready(plugin, words="export it"):
     generate(plugin, [direction(accent=None)])
     lock_all(plugin)
     confirm(plugin, words)
-    return json.loads(plugin.export_design_md({"confirmed_by_user": words}, session_id="one"))
+    return json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": words}, session_id="one"))
 
 
 def test_export_falls_back_for_home_root_and_hermes_cwd():
@@ -1990,7 +1990,7 @@ def test_export_falls_back_for_home_root_and_hermes_cwd():
         plugin._activate("one")
         for index, value in enumerate((str(Path.home()), Path.home().anchor, str(Path.home() / ".hermes" / "project"))):
             state.apply_patch("workspace_cwd", value, "one")
-            exported = _export_ready(plugin, "export " + str(len(value))) if index == 0 else (confirm(plugin, "export " + str(len(value))), json.loads(plugin.export_design_md({"confirmed_by_user":"export " + str(len(value))}, session_id="one")))[1]
+            exported = _export_ready(plugin, "export " + str(len(value))) if index == 0 else (confirm(plugin, "export " + str(len(value))), json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user":"export " + str(len(value))}, session_id="one")))[1]
             assert "Documents" in exported["design_md_path"] and "Design Discovery" in exported["design_md_path"]
 
 
@@ -1999,20 +1999,20 @@ def test_export_folder_provenance_naming_and_same_session_overwrite():
         folder = state.data_dir() / "chosen"; folder.mkdir()
         plugin.pre_llm_call(session_id="one", user_message="Save it in " + str(folder))
         generate(plugin, [direction(accent=None)]); lock_all(plugin); confirm(plugin, "export it")
-        first = json.loads(plugin.export_design_md({"confirmed_by_user":"export it", "folder":str(folder)}, session_id="one"))
+        first = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user":"export it", "folder":str(folder)}, session_id="one"))
         assert Path(first["design_md_path"]).parent == folder
         confirm(plugin, "export again")
-        again = json.loads(plugin.export_design_md({"confirmed_by_user":"export again", "folder":str(folder)}, session_id="one"))
+        again = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user":"export again", "folder":str(folder)}, session_id="one"))
         assert again["design_md_path"] == first["design_md_path"]
         other = folder / "DESIGN.md"; other.write_text("other", encoding="utf-8")
-        assert json.loads(plugin.export_design_md({"confirmed_by_user":"export again", "folder":str(folder)}, session_id="one"))["ok"]
+        assert json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user":"export again", "folder":str(folder)}, session_id="one"))["ok"]
 
 
 def test_export_refuses_untyped_folder():
     with isolated_plugin() as plugin:
         folder = state.data_dir() / "untyped"; folder.mkdir()
         generate(plugin, [direction(accent=None)]); lock_all(plugin); confirm(plugin, "export it")
-        refused = json.loads(plugin.export_design_md({"confirmed_by_user":"export it", "folder":str(folder)}, session_id="one"))
+        refused = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user":"export it", "folder":str(folder)}, session_id="one"))
         assert refused["ok"] is False
 
 
@@ -2049,7 +2049,7 @@ def test_failed_generation_log_redacts_to_palette_fields():
             def register_hook(self, *args): pass
             def register_skill(self, *args): pass
         context = Context(); plugin.register(context); confirmation = confirmed_understanding(plugin)
-        context.generate_directions({"directions":[{"label":"One","rationale":"secret","sources":{},"composed_palette":{"accent":"#ABCDEF"}}],"answers":ANSWERS,"confirmed_by_user":confirmation}, session_id="one")
+        context.design_discovery_generate_directions({"directions":[{"label":"One","rationale":"secret","sources":{},"composed_palette":{"accent":"#ABCDEF"}}],"answers":ANSWERS,"confirmed_by_user":confirmation}, session_id="one")
         event = json.loads(state.tool_events_path("one").read_text(encoding="utf-8").splitlines()[-1])
         assert "secret" not in json.dumps(event) and event["args"]["directions"][0]["color"]["accent"] == "#ABCDEF"
 
@@ -2097,7 +2097,7 @@ def test_direction_voice_overrides_state_pane_and_design_md():
         api = dashboard_api()
         assert api.resolved_state("one")["resolved_directions"][0]["tokens"]["voice"] == voice
         lock_all(plugin); confirm(plugin, "export it")
-        document = json.loads(plugin.export_design_md({"confirmed_by_user": "export it"}, session_id="one"))["design_md"]
+        document = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "export it"}, session_id="one"))["design_md"]
         assert "Tone: Warm and practical" in document and "Your sourdough is ready for pickup." in document
 
 
@@ -2194,18 +2194,18 @@ def test_no_op_updates_return_success_without_error():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
         update_success(plugin, {"action": "try", "directions": {"typography": "one"}})
-        repeated_try = json.loads(plugin.update_choice({"action": "try", "directions": {"typography": "one"}}, session_id="one"))
+        repeated_try = json.loads(plugin.design_discovery_update_choice({"action": "try", "directions": {"typography": "one"}}, session_id="one"))
         assert repeated_try["ok"] is True and repeated_try["changed"] is False and repeated_try["changes"] == [] and "error" not in repeated_try
         confirm(plugin, "lock it")
         update_success(plugin, {"action": "lock", "dimension": "typography", "confirmed_by_user": "lock it"})
-        repeated_lock = json.loads(plugin.update_choice({"action": "lock", "dimension": "typography", "confirmed_by_user": "lock it"}, session_id="one"))
+        repeated_lock = json.loads(plugin.design_discovery_update_choice({"action": "lock", "dimension": "typography", "confirmed_by_user": "lock it"}, session_id="one"))
         assert repeated_lock["ok"] is True and repeated_lock["changed"] is False and repeated_lock["changes"] == [] and "error" not in repeated_lock
 
 
 def test_removing_a_missing_adjustment_is_a_successful_no_op():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
-        result = json.loads(plugin.update_choice({"action": "adjust", "path": "motion.preset", "value": None}, session_id="one"))
+        result = json.loads(plugin.design_discovery_update_choice({"action": "adjust", "path": "motion.preset", "value": None}, session_id="one"))
         assert result["ok"] is True and result["changed"] is False and result["changes"] == [] and "error" not in result
         assert result["next"] == "Nothing to remove; the pane is unchanged."
 
@@ -2235,7 +2235,7 @@ def test_accent_text_uses_black_when_white_does_not_pass_and_export_has_no_failu
         generate(plugin, composed_triplet(first=choice)); confirm(plugin, "approve it")
         update_success(plugin, {"action": "approve_direction", "direction": "Clay Morning", "confirmed_by_user": "approve it"})
         confirm(plugin, "export it")
-        document = json.loads(plugin.export_design_md({"confirmed_by_user": "export it"}, session_id="one"))["design_md"]
+        document = json.loads(plugin.design_discovery_export_design_md({"confirmed_by_user": "export it"}, session_id="one"))["design_md"]
         assert "Accent Text" in document and next(line for line in document.splitlines() if "accent text on accent" in line).endswith("| Pass |")
 
 

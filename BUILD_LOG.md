@@ -43,7 +43,7 @@
 - `& .\sync-plugin.ps1` — wrote a BOM-free installed stamp; first bytes verified as `7B 22 64`.
 - `hermes plugins validate . --install-deps` — passed; expected host-isolation buffered-dashboard diagnostic only.
 - Track A decision: DesignState includes `session_id`; `pre_llm_call` will inject only when both `active` is true and that id matches the current session.
-- Track A decision: the first `generate_directions` call binds one active session; a call from another session resets DesignState before saving its directions.
+- Track A decision: the first `design_discovery_generate_directions` call binds one active session; a call from another session resets DesignState before saving its directions.
 - Track A: `pytest` is not installed in Hermes' bundled Python (`No module named pytest`); `tests/test_track_a.py` remains pytest-compatible and `tests/run_track_a.py` provides a stdlib fallback runner.
 - Track A local checks use the stdlib fallback, smoke test, data validator, and `hermes plugins validate .` without dependency installation.
 - Tool dispatch follows `handler(args: dict, **kwargs)` and uses injected `session_id` for the same identity as `pre_llm_call`; `smoke_tools.py` simulates that dispatch, while live Hermes testing remains the real gate.

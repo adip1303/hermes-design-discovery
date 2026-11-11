@@ -8,17 +8,17 @@ from .design_core import ADJUSTMENT_PATHS, DIMENSIONS, VOCABULARY, archetypes, a
 from .state import append_tool_event, design_md_path, fresh_state, get_state, replace_state
 TYPOGRAPHY_VARIETY_ENABLED = True
 
-GENERATE_SCHEMA = {"name":"generate_directions","description":"Validate and store exactly three directions after recorded understanding and user confirmation. Example sample: {title: Morning bake list, body: Fresh loaves ready for pickup, items: [{label: Country loaf, status: success, status_label: Ready}, {label: Cardamom bun, status: warning, status_label: Limited}], primary: Order bakes, secondary: View menu}.","parameters":{"type":"object","properties":{"directions":{"type":"array","items":{"type":"object","properties":{"voice":{"type":"object","properties":{"tone":{"type":"string","maxLength":60},"do":{"type":"array","minItems":3,"maxItems":3,"items":{"type":"string","maxLength":30}},"dont":{"type":"array","minItems":3,"maxItems":3,"items":{"type":"string","maxLength":30}},"example":{"type":"string","maxLength":100}},"required":["tone","do","dont","example"]}}}},"brief":{"type":"string"},"answers":{"type":"array"},"sample":{"type":"object","properties":{"title":{"type":"string","maxLength":40},"body":{"type":"string","maxLength":140},"items":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"object","properties":{"label":{"type":"string","maxLength":28},"status":{"type":"string","enum":["success","warning","neutral"]},"status_label":{"type":"string","maxLength":18}},"required":["label","status","status_label"]}},"primary":{"type":"string","maxLength":20},"secondary":{"type":"string","maxLength":20}},"required":["title","body","items","primary","secondary"]},"confirmed_by_user":{"type":"string"}},"required":["directions","confirmed_by_user"]}}
-GENERATE_SCHEMA = {"name":"generate_directions","description":"Validate and store exactly three directions after recorded understanding and user confirmation. Example sample: {title: Morning bake list, body: Fresh loaves ready for pickup, items: [{label: Country loaf, status: success, status_label: Ready}, {label: Cardamom bun, status: warning, status_label: Limited}], primary: Order bakes, secondary: View menu}.","parameters":{"type":"object","properties":{"directions":{"type":"array","items":{"type":"object","properties":{"voice":{"type":"object","description":"Optional voice: tone is up to 60 characters, do and dont are three lines up to 48 characters each, and example is up to 100 characters.","properties":{"tone":{"type":"string"},"do":{"type":"array","items":{"type":"string"}},"dont":{"type":"array","items":{"type":"string"}},"example":{"type":"string"}}}}}},"brief":{"type":"string"},"answers":{"type":"array"},"sample":{"type":"object","description":"Optional specimen: title up to 40 characters, body up to 140, two items with label up to 28 and status_label up to 18, and primary and secondary up to 20.","properties":{"title":{"type":"string"},"body":{"type":"string"},"items":{"type":"array","items":{"type":"object","properties":{"label":{"type":"string"},"status":{"type":"string","enum":["success","warning","neutral"]},"status_label":{"type":"string"}}}},"primary":{"type":"string"},"secondary":{"type":"string"}}},"confirmed_by_user":{"type":"string"}},"required":["directions","confirmed_by_user"]}}
-UNDERSTANDING_SCHEMA = {"name":"record_understanding","description":"Record a plain-language, two-sentence playback of what the user wants before directions are generated.","parameters":{"type":"object","properties":{"summary":{"type":"string"}},"required":["summary"]}}
-UPDATE_SCHEMA = {"name":"update_choice","description":"Try, approve, or lock directions; adjust tokens; reject values; manage constraints; or end the design session. Example try: {\"action\":\"try\",\"directions\":{\"typography\":\"dir-a\",\"color\":\"option 2\"}}. Approve unchanged direction: {\"action\":\"approve_direction\",\"direction\":\"1\",\"confirmed_by_user\":\"I am happy with it\"}. Described accent: {\"action\":\"adjust\",\"path\":\"color.accent\",\"value\":\"#C65A22\",\"source\":\"described\",\"user_words\":\"orange like a tangerine\"}.","parameters":{"type":"object","properties":{"action":{"type":"string","enum":["try","approve_direction","lock","unlock","reject","clear_reject","adjust","add_constraint","remove_constraint","end"],"description":"Required action."},"dimension":{"type":"string","enum":list(DIMENSIONS),"description":"Dimension for lock, unlock, reject, or clear_reject."},"direction_id":{"type":"string","description":"Direction reference for lock or unlock."},"direction":{"type":"string","description":"Direction id, exact label, or ordinal for approve_direction."},"directions":{"type":"object","additionalProperties":{"type":"string"},"description":"Dimension-to-direction references for try."},"archetype_id":{"type":"string","description":"Archetype id for reject or clear_reject."},"path":{"type":"string","enum":list(ADJUSTMENT_PATHS),"description":"Supported token path for adjust."},"value":{"description":"Replacement value for adjust, or null to remove."},"source":{"type":"string","enum":["agent","user","direction","described"],"description":"Provenance for adjust."},"from_direction":{"type":"string","description":"Direction reference when borrowing an accent."},"user_words":{"type":"string","description":"Exact user color words for described accents."},"constraint":{"type":"object","description":"Constraint object for add_constraint."},"constraint_id":{"type":"string","description":"Constraint id for remove_constraint."},"confirmed_by_user":{"type":"string","description":"Exact user approval for approve_direction, lock, reject, or add_constraint."}},"required":["action"]}}
-EXPORT_SCHEMA = {"name":"export_design_md","description":"Export deterministic DESIGN.md once all dimensions are locked.","parameters":{"type":"object","properties":{"confirmed_by_user":{"type":"string"},"folder":{"type":"string","description":"An existing folder path the user typed."}},"required":["confirmed_by_user"]}}
+GENERATE_SCHEMA = {"name":"design_discovery_generate_directions","description":"Validate and store exactly three directions after recorded understanding and user confirmation. Example sample: {title: Morning bake list, body: Fresh loaves ready for pickup, items: [{label: Country loaf, status: success, status_label: Ready}, {label: Cardamom bun, status: warning, status_label: Limited}], primary: Order bakes, secondary: View menu}.","parameters":{"type":"object","properties":{"directions":{"type":"array","items":{"type":"object","properties":{"voice":{"type":"object","properties":{"tone":{"type":"string","maxLength":60},"do":{"type":"array","minItems":3,"maxItems":3,"items":{"type":"string","maxLength":30}},"dont":{"type":"array","minItems":3,"maxItems":3,"items":{"type":"string","maxLength":30}},"example":{"type":"string","maxLength":100}},"required":["tone","do","dont","example"]}}}},"brief":{"type":"string"},"answers":{"type":"array"},"sample":{"type":"object","properties":{"title":{"type":"string","maxLength":40},"body":{"type":"string","maxLength":140},"items":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"object","properties":{"label":{"type":"string","maxLength":28},"status":{"type":"string","enum":["success","warning","neutral"]},"status_label":{"type":"string","maxLength":18}},"required":["label","status","status_label"]}},"primary":{"type":"string","maxLength":20},"secondary":{"type":"string","maxLength":20}},"required":["title","body","items","primary","secondary"]},"confirmed_by_user":{"type":"string"}},"required":["directions","confirmed_by_user"]}}
+GENERATE_SCHEMA = {"name":"design_discovery_generate_directions","description":"Validate and store exactly three directions after recorded understanding and user confirmation. Example sample: {title: Morning bake list, body: Fresh loaves ready for pickup, items: [{label: Country loaf, status: success, status_label: Ready}, {label: Cardamom bun, status: warning, status_label: Limited}], primary: Order bakes, secondary: View menu}.","parameters":{"type":"object","properties":{"directions":{"type":"array","items":{"type":"object","properties":{"voice":{"type":"object","description":"Optional voice: tone is up to 60 characters, do and dont are three lines up to 48 characters each, and example is up to 100 characters.","properties":{"tone":{"type":"string"},"do":{"type":"array","items":{"type":"string"}},"dont":{"type":"array","items":{"type":"string"}},"example":{"type":"string"}}}}}},"brief":{"type":"string"},"answers":{"type":"array"},"sample":{"type":"object","description":"Optional specimen: title up to 40 characters, body up to 140, two items with label up to 28 and status_label up to 18, and primary and secondary up to 20.","properties":{"title":{"type":"string"},"body":{"type":"string"},"items":{"type":"array","items":{"type":"object","properties":{"label":{"type":"string"},"status":{"type":"string","enum":["success","warning","neutral"]},"status_label":{"type":"string"}}}},"primary":{"type":"string"},"secondary":{"type":"string"}}},"confirmed_by_user":{"type":"string"}},"required":["directions","confirmed_by_user"]}}
+UNDERSTANDING_SCHEMA = {"name":"design_discovery_record_understanding","description":"Record a plain-language, two-sentence playback of what the user wants before directions are generated.","parameters":{"type":"object","properties":{"summary":{"type":"string"}},"required":["summary"]}}
+UPDATE_SCHEMA = {"name":"design_discovery_update_choice","description":"Try, approve, or lock directions; adjust tokens; reject values; manage constraints; or end the design session. Example try: {\"action\":\"try\",\"directions\":{\"typography\":\"dir-a\",\"color\":\"option 2\"}}. Approve unchanged direction: {\"action\":\"approve_direction\",\"direction\":\"1\",\"confirmed_by_user\":\"I am happy with it\"}. Described accent: {\"action\":\"adjust\",\"path\":\"color.accent\",\"value\":\"#C65A22\",\"source\":\"described\",\"user_words\":\"orange like a tangerine\"}.","parameters":{"type":"object","properties":{"action":{"type":"string","enum":["try","approve_direction","lock","unlock","reject","clear_reject","adjust","add_constraint","remove_constraint","end"],"description":"Required action."},"dimension":{"type":"string","enum":list(DIMENSIONS),"description":"Dimension for lock, unlock, reject, or clear_reject."},"direction_id":{"type":"string","description":"Direction reference for lock or unlock."},"direction":{"type":"string","description":"Direction id, exact label, or ordinal for approve_direction."},"directions":{"type":"object","additionalProperties":{"type":"string"},"description":"Dimension-to-direction references for try."},"archetype_id":{"type":"string","description":"Archetype id for reject or clear_reject."},"path":{"type":"string","enum":list(ADJUSTMENT_PATHS),"description":"Supported token path for adjust."},"value":{"description":"Replacement value for adjust, or null to remove."},"source":{"type":"string","enum":["agent","user","direction","described"],"description":"Provenance for adjust."},"from_direction":{"type":"string","description":"Direction reference when borrowing an accent."},"user_words":{"type":"string","description":"Exact user color words for described accents."},"constraint":{"type":"object","description":"Constraint object for add_constraint."},"constraint_id":{"type":"string","description":"Constraint id for remove_constraint."},"confirmed_by_user":{"type":"string","description":"Exact user approval for approve_direction, lock, reject, or add_constraint."}},"required":["action"]}}
+EXPORT_SCHEMA = {"name":"design_discovery_export_design_md","description":"Export deterministic DESIGN.md once all dimensions are locked.","parameters":{"type":"object","properties":{"confirmed_by_user":{"type":"string"},"folder":{"type":"string","description":"An existing folder path the user typed."}},"required":["confirmed_by_user"]}}
 GET_STATE_SCHEMA = {"name":"design_discovery_get_state","description":"Read the authoritative persistent design state, resolved directions, and catalog. Example: {} returns catalog.archetypes and catalog.fonts; use adjustments in the exact shape {\"typography.display_font\":{\"value\":\"inter\",\"source\":\"agent\"}}. This read-only tool has no confirmed_by_user parameter.","parameters":{"type":"object","properties":{}}}
 _RECENT_USER_MESSAGES: dict[str, list[str]] = {}
 _RECENT_ASSISTANT_MESSAGES: dict[str, list[str]] = {}
 _RECENT_MESSAGE_EVENTS: dict[str, list[dict]] = {}
 _CONFIRMATION_ERROR = "Ask the user to approve this in their own words, then pass their exact words as confirmed_by_user."
-_NEXT_GET_STATE = "Ask the user what they’re making, who it’s for, how it should feel, and what they don’t want. Then call record_understanding with what you understood, show it to the user, and wait for them to confirm before generating directions."
+_NEXT_GET_STATE = "Ask the user what they’re making, who it’s for, how it should feel, and what they don’t want. Then call design_discovery_record_understanding with what you understood, show it to the user, and wait for them to confirm before generating directions."
 _NEXT_INTERVIEW = "Ask the user at least one round of questions (what it's for, how it should feel, what to avoid), then wait for their reply."
 _NO_INTERNALS = " Keep the reply focused on the selected direction and its design, using plain language rather than implementation terms."
 _NEXT_GENERATE = "Describe each direction in one plain sentence and tell the user the pane shows them. Ask which is closest and what they would change, then stop. Do not recommend one. Do not offer to build, mock up, or render anything outside the pane. Do not lock anything until the user says so. Never name archetypes or design systems; describe what each direction does. When the user likes a direction but wants a change, use try for that whole direction, then adjust only what they asked for. Never lock until they approve what the pane shows."
@@ -29,9 +29,9 @@ _NEXT_ACCENT_CONTRAST = "Describe the color’s legibility in plain words and of
 _NEXT_CONFIRMATION = "Ask the user in plain words whether they want this. Do not suggest wording for their reply."
 _NEXT_EXPORT = "Tell the user DESIGN.md is ready in the pane. Point them to Copy DESIGN.md and say it was saved at the returned path. Do not write or link to files yourself."
 _NEXT_UNDERSTANDING = "Show the user this summary in your own words and ask if it’s right. Then stop and wait for their reply."
-_NEXT_MISSING_UNDERSTANDING = "Nothing was generated. Call record_understanding with what you understood, show it to the user, and wait for their reply. Never describe directions that haven’t been generated."
-_NEXT_UNCONFIRMED_UNDERSTANDING = "Nothing was generated. An understanding was recorded, but no confirmation of it is on record. If the user has already confirmed it, call record_understanding with the summary you showed them, then call generate_directions with their reply, word for word, as confirmed_by_user. If they have not replied yet, show them the summary and wait for their reply."
-_NEXT_MISSING_UNDERSTANDING_CONFIRMATION = "The user has replied to the summary. Call generate_directions with that reply, word for word, as confirmed_by_user. Do not call record_understanding again."
+_NEXT_MISSING_UNDERSTANDING = "Nothing was generated. Call design_discovery_record_understanding with what you understood, show it to the user, and wait for their reply. Never describe directions that haven’t been generated."
+_NEXT_UNCONFIRMED_UNDERSTANDING = "Nothing was generated. An understanding was recorded, but no confirmation of it is on record. If the user has already confirmed it, call design_discovery_record_understanding with the summary you showed them, then call design_discovery_generate_directions with their reply, word for word, as confirmed_by_user. If they have not replied yet, show them the summary and wait for their reply."
+_NEXT_MISSING_UNDERSTANDING_CONFIRMATION = "The user has replied to the summary. Call design_discovery_generate_directions with that reply, word for word, as confirmed_by_user. Do not call design_discovery_record_understanding again."
 _NEXT_QUOTED_CONSENT = "Ask the user in your own words whether they approve. Do not suggest how to reply, then wait."
 _NEXT_GENERIC_REFUSAL = "Resolve this within the design workflow when possible. If input is needed, ask in plain words. Keep the reply about the design and report only completed changes."
 _NEXT_RENAME = "Rename the direction to describe what it does. Never use starting point names."
@@ -40,7 +40,7 @@ _NEXT_UNEXPECTED_ARGUMENT = "Remove the unexpected argument. Valid fields includ
 _NEXT_DESCRIBED_ACCENT = "Tell the user in one sentence that you matched the color they described and the pane shows it. Ask if it’s the shade they meant, then stop. If they approve the whole direction, use approve_direction, not lock."
 _NEXT_CONFIRMATION_MISMATCH = "Pass the user’s reply exactly as they wrote it as confirmed_by_user."
 _NEXT_AWAITING_UNDERSTANDING_REPLY = "The user hasn’t replied yet. Show them your understanding and wait for their reply."
-_NEXT_ALREADY_CONFIRMED_UNDERSTANDING = "The understanding is already confirmed. Call generate_directions with the user’s reply as confirmed_by_user. Do not call record_understanding again."
+_NEXT_ALREADY_CONFIRMED_UNDERSTANDING = "The understanding is already confirmed. Call design_discovery_generate_directions with the user’s reply as confirmed_by_user. Do not call design_discovery_record_understanding again."
 _NEXT_NO_CHANGE = "Report only the changes listed; if none, ask the user what they meant."
 _NEXT_NOTHING_REMOVE = "Nothing to remove; the pane is unchanged."
 _NEXT_CHANGED = "Tell the user exactly these changes in plain words, nothing else, then stop."
@@ -216,7 +216,7 @@ def _working_direction(state):
 def _sources(state): return {dimension: state["working"][dimension]["source"] for dimension in DIMENSIONS}
 def _direction(state, direction_id): return next((item for item in state["directions"] if item["id"] == direction_id), None)
 def _direction_reference_error(state, value):
-    if not state["directions"]: return "No directions have been generated yet. Call generate_directions first before referring to a direction."
+    if not state["directions"]: return "No directions have been generated yet. Call design_discovery_generate_directions first before referring to a direction."
     choices = ", ".join(str(index + 1) + " (" + item["label"] + ", " + item["id"] + ")" for index, item in enumerate(state["directions"]))
     return "Unknown direction reference " + repr(value) + ". Valid directions: " + choices
 def _direction_by_reference(state, value):
@@ -230,7 +230,7 @@ def _direction_by_reference(state, value):
     ordinal = {"first": 1, "second": 2, "third": 3}.get(token, int(token) if token.isdigit() else 0)
     return state["directions"][ordinal - 1] if 1 <= ordinal <= len(state["directions"]) else None
 class _Guidance(Exception):
-    """A recoverable update_choice problem: nothing changes and the next text says how to proceed."""
+    """A recoverable design_discovery_update_choice problem: nothing changes and the next text says how to proceed."""
 _REFERENCE_EXAMPLES = {
     "try": '{"action":"try","directions":{"color":"2"}}',
     "approve_direction": '{"action":"approve_direction","direction":"2","confirmed_by_user":"<the words the user wrote>"}',
@@ -549,7 +549,7 @@ def _composed_text_refusal(recoveries):
         darker, lighter = recovery["darker"], recovery["lighter"]
         recommended = recovery["recommended"]
         details.append(label + ": " + pairs + ". These mid-tone grounds cannot provide the required contrast with any text color. Keep the current light text and use background " + darker["background"] + " and surface " + darker["surface"] + ", or use dark text #000000 with background " + lighter["background"] + " and surface " + lighter["surface"] + ". The " + recommended + " option is closer to the original grounds.")
-    next_step = " ".join(details) + " Resend generate_directions with that change and keep the directions that passed unchanged."
+    next_step = " ".join(details) + " Resend design_discovery_generate_directions with that change and keep the directions that passed unchanged."
     return json.dumps({"ok":False, "error":"composed palette text cannot be made readable", "next":next_step}, ensure_ascii=False)
 def _activate(session_id):
     state = _clean(get_state(session_id))
@@ -562,7 +562,7 @@ def _activate(session_id):
     return state
 def _is_design_invocation(message): return isinstance(message, str) and 'user has invoked the "design-discovery" skill' in message.casefold()
 
-def record_understanding(args: dict, **kwargs) -> str:
+def design_discovery_record_understanding(args: dict, **kwargs) -> str:
     try:
         _check_arguments(args, {"summary"})
         session_id, summary = str(kwargs.get("session_id") or ""), args.get("summary")
@@ -578,7 +578,7 @@ def record_understanding(args: dict, **kwargs) -> str:
         return _result(_NEXT_ALREADY_CONFIRMED_UNDERSTANDING if confirmed_reply else _NEXT_UNDERSTANDING, recorded=True, state=replace_state(state, session_id))
     except Exception as exc: return _refusal(exc)
 
-def generate_directions(args: dict, **kwargs) -> str:
+def design_discovery_generate_directions(args: dict, **kwargs) -> str:
     try:
         _check_arguments(args, {"directions", "brief", "answers", "sample", "confirmed_by_user"})
         directions, brief, answers = args.get("directions", []), args.get("brief"), args.get("answers")
@@ -638,7 +638,7 @@ def generate_directions(args: dict, **kwargs) -> str:
             return _composed_text_refusal(text_recoveries)
         variety_error = color_variety_error(valid_directions, typography_variety=TYPOGRAPHY_VARIETY_ENABLED) if len(valid_directions) > 1 else None
         if variety_error:
-            return _result("Nothing was generated and the pane is unchanged. " + variety_error + " Resubmit generate_directions with these moves applied before replying.", generated=False, status="needs_changes", guidance=variety_error, warnings=warnings)
+            return _result("Nothing was generated and the pane is unchanged. " + variety_error + " Resubmit design_discovery_generate_directions with these moves applied before replying.", generated=False, status="needs_changes", guidance=variety_error, warnings=warnings)
         if validation_errors: raise ValueError("generation validation failed:\n" + "\n".join(validation_errors))
         state["directions"] = directions
         state["sample"] = sample
@@ -650,7 +650,7 @@ def generate_directions(args: dict, **kwargs) -> str:
         return _result(next_step, generated=True, state=replace_state(state, session_id), generated_directions=generated, warnings=warnings)
     except Exception as exc: return _refusal(exc)
 
-def update_choice(args: dict, **kwargs) -> str:
+def design_discovery_update_choice(args: dict, **kwargs) -> str:
     try:
         session_id = str(kwargs.get("session_id") or "")
         if not session_id: raise ValueError("session_id is required")
@@ -777,7 +777,7 @@ def update_choice(args: dict, **kwargs) -> str:
                     allowed = {borrowed_tokens["color"]["accent"], *borrowed_tokens["color"]["accent_alternates"]}
                     if value not in allowed:
                         alternates = [item for item in borrowed_tokens["color"]["accent_alternates"] if item != borrowed_tokens["color"]["accent"]]
-                        raise _Guidance("Nothing changed. " + repr(value) + " is not one of " + borrowed["label"] + "'s accent colors. Its accent is " + borrowed_tokens["color"]["accent"] + ("; its accent alternates are " + ", ".join(alternates) if alternates else "; it has no accent alternates") + ". To borrow its accent, call update_choice with {\"action\":\"adjust\",\"path\":\"color.accent\",\"value\":\"" + borrowed_tokens["color"]["accent"] + "\",\"source\":\"direction\",\"from_direction\":\"" + borrowed["id"] + "\"}.")
+                        raise _Guidance("Nothing changed. " + repr(value) + " is not one of " + borrowed["label"] + "'s accent colors. Its accent is " + borrowed_tokens["color"]["accent"] + ("; its accent alternates are " + ", ".join(alternates) if alternates else "; it has no accent alternates") + ". To borrow its accent, call design_discovery_update_choice with {\"action\":\"adjust\",\"path\":\"color.accent\",\"value\":\"" + borrowed_tokens["color"]["accent"] + "\",\"source\":\"direction\",\"from_direction\":\"" + borrowed["id"] + "\"}.")
                     entry["from_direction"] = borrowed["id"]
                     if not state["working"]["color"]["source"]:
                         _set_working(state, "color", borrowed, "open")
@@ -857,7 +857,7 @@ def design_discovery_get_state(args: dict, **kwargs) -> str:
         elif not state.get("understanding"):
             next_step = _NEXT_GET_STATE
         elif _understanding_reply(state):
-            next_step = "Call generate_directions with the user’s reply, word for word, as confirmed_by_user. Do not call record_understanding again."
+            next_step = "Call design_discovery_generate_directions with the user’s reply, word for word, as confirmed_by_user. Do not call design_discovery_record_understanding again."
         else:
             next_step = _NEXT_AWAITING_UNDERSTANDING_REPLY
         next_step += _NO_INTERNALS
@@ -883,7 +883,7 @@ def design_discovery_get_state_tool(args: dict, **kwargs) -> str:
     payload["resolved_working"] = _compact_resolved(payload.get("resolved_working"))
     return json.dumps(payload, ensure_ascii=False)
 
-def export_design_md(args: dict, **kwargs) -> str:
+def design_discovery_export_design_md(args: dict, **kwargs) -> str:
     try:
         _check_arguments(args, {"confirmed_by_user", "folder"})
         session_id = str(kwargs.get("session_id") or "")
@@ -983,7 +983,7 @@ def pre_tool_call(**kwargs):
     """Hold build tools while the design session remains active."""
     try:
         tool_name, session_id = str(kwargs.get("tool_name") or ""), str(kwargs.get("session_id") or "")
-        allowed = {"generate_directions", "record_understanding", "design_discovery_get_state", "update_choice", "export_design_md", "tool_search", "tool_describe", "skills_list", "clarify"}
+        allowed = {"design_discovery_generate_directions", "design_discovery_record_understanding", "design_discovery_get_state", "design_discovery_update_choice", "design_discovery_export_design_md", "tool_search", "tool_describe", "skills_list", "clarify"}
         if tool_name.startswith("design_discovery") or tool_name in allowed: return None
         state = get_state(session_id)
         if not state.get("active") or state.get("session_id") != session_id or state.get("phase") == "final":
@@ -992,8 +992,8 @@ def pre_tool_call(**kwargs):
             args = kwargs.get("args") if isinstance(kwargs.get("args"), dict) else {}
             skill = str(args.get("skill_name") or args.get("name") or args.get("skill") or "")
             if skill in {"design-discovery", "design-discovery:design-discovery"}: return None
-            return {"action": "block", "message": "You’re in a design discovery session. Use only the design discovery tools until DESIGN.md is exported. If the user wants to stop designing or do something else, call update_choice with action end."}
-        return {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported. If the user wants to stop designing or do something else, call update_choice with action end."}
+            return {"action": "block", "message": "You’re in a design discovery session. Use only the design discovery tools until DESIGN.md is exported. If the user wants to stop designing or do something else, call design_discovery_update_choice with action end."}
+        return {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported. If the user wants to stop designing or do something else, call design_discovery_update_choice with action end."}
     except Exception:
         return None
 
@@ -1005,11 +1005,11 @@ def register(ctx) -> None:
             if session_id:
                 payload = json.loads(result)
                 structural = {key: args[key] for key in ("dimension", "path", "source", "direction", "direction_id", "from_direction") if key in args}
-                if name == "generate_directions" and isinstance(payload.get("generated_directions"), list):
+                if name == "design_discovery_generate_directions" and isinstance(payload.get("generated_directions"), list):
                     structural["directions"] = payload["generated_directions"]
-                elif name == "generate_directions" and isinstance(args.get("directions"), list):
+                elif name == "design_discovery_generate_directions" and isinstance(args.get("directions"), list):
                     structural["directions"] = [{"color": {key: direction.get("composed_palette", {}).get(key) for key in ("background", "surface", "text", "muted", "border", "border_strong", "accent")}, "accent_usage": direction.get("accent_usage")} for direction in args["directions"] if isinstance(direction, dict)]
-                if name == "generate_directions":
+                if name == "design_discovery_generate_directions":
                     sample = args.get("sample")
                     structural["sample_shape"] = {str(key): type(value).__name__ for key, value in sample.items()} if isinstance(sample, dict) else type(sample).__name__
                     structural["voice_shapes"] = [{str(key): type(value).__name__ for key, value in item.get("voice", {}).items()} if isinstance(item.get("voice"), dict) else type(item.get("voice")).__name__ for item in args.get("directions", []) if isinstance(item, dict)]
@@ -1019,9 +1019,9 @@ def register(ctx) -> None:
                     pass
             return result
         return invoke
-    ctx.register_tool(name="generate_directions",toolset="design_discovery",schema=GENERATE_SCHEMA,handler=logged("generate_directions", generate_directions))
-    ctx.register_tool(name="record_understanding",toolset="design_discovery",schema=UNDERSTANDING_SCHEMA,handler=logged("record_understanding", record_understanding))
+    ctx.register_tool(name="design_discovery_generate_directions",toolset="design_discovery",schema=GENERATE_SCHEMA,handler=logged("design_discovery_generate_directions", design_discovery_generate_directions))
+    ctx.register_tool(name="design_discovery_record_understanding",toolset="design_discovery",schema=UNDERSTANDING_SCHEMA,handler=logged("design_discovery_record_understanding", design_discovery_record_understanding))
     ctx.register_tool(name="design_discovery_get_state",toolset="design_discovery",schema=GET_STATE_SCHEMA,handler=logged("design_discovery_get_state", design_discovery_get_state_tool))
-    ctx.register_tool(name="update_choice",toolset="design_discovery",schema=UPDATE_SCHEMA,handler=logged("update_choice", update_choice))
-    ctx.register_tool(name="export_design_md",toolset="design_discovery",schema=EXPORT_SCHEMA,handler=logged("export_design_md", export_design_md))
+    ctx.register_tool(name="design_discovery_update_choice",toolset="design_discovery",schema=UPDATE_SCHEMA,handler=logged("design_discovery_update_choice", design_discovery_update_choice))
+    ctx.register_tool(name="design_discovery_export_design_md",toolset="design_discovery",schema=EXPORT_SCHEMA,handler=logged("design_discovery_export_design_md", design_discovery_export_design_md))
     ctx.register_hook("pre_llm_call",pre_llm_call); ctx.register_hook("post_llm_call",post_llm_call); ctx.register_hook("pre_tool_call",pre_tool_call); ctx.register_hook("post_tool_call",post_tool_call); ctx.register_skill("design-discovery",Path(__file__).parent / "skills" / "design-discovery" / "SKILL.md")

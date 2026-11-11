@@ -57,7 +57,7 @@ def main() -> None:
         state.data_dir = lambda: Path(directory)  # type: ignore[method-assign]
         context = RecordingContext()
         plugin.register(context)
-        assert set(context.tools) == {"generate_directions", "record_understanding", "update_choice", "design_discovery_get_state", "export_design_md"}
+        assert set(context.tools) == {"design_discovery_generate_directions", "design_discovery_record_understanding", "design_discovery_update_choice", "design_discovery_get_state", "design_discovery_export_design_md"}
         assert set(context.hooks) == {"pre_llm_call", "post_llm_call", "pre_tool_call", "post_tool_call"}
 
         # Hermes dispatches schema properties as keyword arguments.
@@ -65,9 +65,9 @@ def main() -> None:
         directions = [direction, {**direction, "id": "smoke-two", "label": "Smoke Two", "sources": {**direction["sources"], "color": "editorial"}, "adjustments": {"typography.display_font": {"value": "inter", "source": "agent"}}}, {**direction, "id": "smoke-three", "label": "Smoke Three", "sources": {**direction["sources"], "color": "bright-friendly"}, "adjustments": {"typography.display_font": {"value": "fraunces", "source": "agent"}}}]
         context.hooks["pre_llm_call"](session_id="smoke-session", user_message="I need a dashboard")
         context.hooks["pre_llm_call"](session_id="smoke-session", user_message="It should feel clear and calm")
-        assert result(context.dispatch("record_understanding", {"summary": "You want a clear dashboard."}))["ok"] is True
+        assert result(context.dispatch("design_discovery_record_understanding", {"summary": "You want a clear dashboard."}))["ok"] is True
         context.hooks["pre_llm_call"](session_id="smoke-session", user_message="yes, that is right")
-        written = result(context.dispatch("generate_directions", {"directions": directions, "brief": "smoke", "answers": [{"q": "What is it?", "a": "A dashboard"}], "confirmed_by_user": "yes, that is right"}))
+        written = result(context.dispatch("design_discovery_generate_directions", {"directions": directions, "brief": "smoke", "answers": [{"q": "What is it?", "a": "A dashboard"}], "confirmed_by_user": "yes, that is right"}))
         assert written["ok"] is True
         assert written["state"]["brief"] == "smoke"
 
@@ -77,8 +77,8 @@ def main() -> None:
         assert read["state"]["build_stamp"] is None
         assert read["state"]["loaded_stamp"] is None
         context.hooks["pre_llm_call"](session_id="smoke-session", user_message="confirmed")
-        assert result(context.dispatch("update_choice", {"action": "lock", "dimension": "color", "direction_id": "smoke", "confirmed_by_user": "confirmed"}))["ok"] is True
-        assert result(context.dispatch("export_design_md", {}))["ok"] is False
+        assert result(context.dispatch("design_discovery_update_choice", {"action": "lock", "dimension": "color", "direction_id": "smoke", "confirmed_by_user": "confirmed"}))["ok"] is True
+        assert result(context.dispatch("design_discovery_export_design_md", {}))["ok"] is False
 
         bom_stamp = Path(directory) / "bom-stamp.json"
         bom_stamp.write_text(json.dumps({"git_sha": "bomsha", "built_at": "2026-11-08T00:00:00Z", "dirty": True}), encoding="utf-8-sig")
