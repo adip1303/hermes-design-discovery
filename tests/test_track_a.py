@@ -727,7 +727,7 @@ def test_pre_tool_hook_blocks_building_until_export_and_allows_design_tools():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
         blocked = plugin.pre_tool_call(tool_name="write_file", session_id="one")
-        assert blocked == {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported."}
+        assert blocked == {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported. If the user wants to stop designing or do something else, call update_choice with action end."}
         assert plugin.pre_tool_call(tool_name="design_discovery_get_state", session_id="one") is None
         state_value = state.get_state("one"); state_value["phase"] = "final"; state.replace_state(state_value, "one")
         assert plugin.pre_tool_call(tool_name="terminal", session_id="one") is None
@@ -803,7 +803,7 @@ def test_other_skill_load_is_blocked_only_for_active_session():
     with isolated_plugin() as plugin:
         assert plugin.pre_tool_call(tool_name="skill_view", args={"skill_name": "claude-design"}, session_id="one") is None
         generate(plugin, [direction()], session_id="one")
-        assert plugin.pre_tool_call(tool_name="skill_view", args={"skill_name": "claude-design"}, session_id="one") == {"action": "block", "message": "You’re in a design discovery session. Use only the design discovery tools until DESIGN.md is exported."}
+        assert plugin.pre_tool_call(tool_name="skill_view", args={"skill_name": "claude-design"}, session_id="one") == {"action": "block", "message": "You’re in a design discovery session. Use only the design discovery tools until DESIGN.md is exported. If the user wants to stop designing or do something else, call update_choice with action end."}
         assert plugin.pre_tool_call(tool_name="skill_view", args={"skill_name": "design-discovery:design-discovery"}, session_id="one") is None
 
 
@@ -1224,7 +1224,7 @@ def test_borrowed_accent_recomputes_text_and_usage_for_all_contrast_cases():
 def test_skill_manage_is_blocked_during_an_active_design_session():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
-        assert plugin.pre_tool_call(tool_name="skill_manage", session_id="one") == {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported."}
+        assert plugin.pre_tool_call(tool_name="skill_manage", session_id="one") == {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported. If the user wants to stop designing or do something else, call update_choice with action end."}
 
 
 def test_lock_fills_unset_dimensions_from_its_direction():
@@ -1267,7 +1267,7 @@ def test_lock_requires_confirmation_after_the_dimension_was_last_changed():
 def test_file_reads_and_searches_are_blocked_during_an_active_design_session():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
-        expected = {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported."}
+        expected = {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported. If the user wants to stop designing or do something else, call update_choice with action end."}
         assert plugin.pre_tool_call(tool_name="read_file", session_id="one") == expected
         assert plugin.pre_tool_call(tool_name="search_files", session_id="one") == expected
 
@@ -1619,7 +1619,7 @@ def test_design_md_brief_uses_skill_command_remainder_or_next_user_message():
 def test_active_session_allowlist_and_post_export_release():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
-        blocked = {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported."}
+        blocked = {"action": "block", "message": "Design discovery is in progress. Use the design discovery tools, tool search, or tool detail until DESIGN.md is exported. If the user wants to stop designing or do something else, call update_choice with action end."}
         assert plugin.pre_tool_call(tool_name="computer_use", session_id="one") == blocked
         assert plugin.pre_tool_call(tool_name="terminal", session_id="one") == blocked
         assert plugin.pre_tool_call(tool_name="tool_search", session_id="one") is None
@@ -1630,6 +1630,24 @@ def test_active_session_allowlist_and_post_export_release():
         confirm(plugin, "export it")
         json.loads(plugin.export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
         assert plugin.pre_tool_call(tool_name="computer_use", session_id="one") is None
+
+
+def test_get_state_does_not_activate_a_fresh_session_or_block_terminal():
+    with isolated_plugin() as plugin:
+        state_value = json.loads(plugin.design_discovery_get_state_tool({}, session_id="one"))["state"]
+        assert state_value["active"] is False
+        assert plugin.pre_tool_call(tool_name="terminal", session_id="one") is None
+
+
+def test_end_releases_an_active_session_and_is_a_successful_inactive_no_op():
+    with isolated_plugin() as plugin:
+        generate(plugin, [direction()])
+        assert plugin.pre_tool_call(tool_name="terminal", session_id="one")["action"] == "block"
+        ended = json.loads(plugin.update_choice({"action": "end"}, session_id="one"))
+        assert ended["ok"] is True and ended["state"]["active"] is False
+        assert plugin.pre_tool_call(tool_name="terminal", session_id="one") is None
+        inactive = json.loads(plugin.update_choice({"action": "end"}, session_id="one"))
+        assert inactive["ok"] is True and inactive["changed"] is False and inactive["changes"] == []
 
 
 def test_every_refusal_message_has_specific_recovery_text():
