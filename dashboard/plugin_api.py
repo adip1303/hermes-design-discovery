@@ -2,20 +2,52 @@
 
 from __future__ import annotations
 
-import sys
+import importlib
+import importlib.util
 import json
 import logging
+import sys
+import types
 from pathlib import Path
 
 from fastapi import APIRouter, HTTPException, Request
 
 _ROOT = Path(__file__).resolve().parent.parent
-if str(_ROOT) not in sys.path:
-    sys.path.insert(0, str(_ROOT))
+_PACKAGE = "design_discovery_dashboard"
 
-from __init__ import design_discovery_get_state
-from design_core import fonts
-from state import apply_patch, available_session_ids, has_valid_state
+
+def _load_plugin_entry():
+    entry_path = (_ROOT / "__init__.py").resolve()
+    for module in tuple(sys.modules.values()):
+        source = getattr(module, "__file__", None)
+        if source and Path(source).resolve() == entry_path:
+            return module
+    package = sys.modules.get(_PACKAGE)
+    if package is None:
+        package = types.ModuleType(_PACKAGE)
+        package.__path__ = [str(_ROOT)]
+        package.__package__ = _PACKAGE
+        sys.modules[_PACKAGE] = package
+    name = _PACKAGE + ".entry"
+    module = sys.modules.get(name)
+    if module is None:
+        spec = importlib.util.spec_from_file_location(name, _ROOT / "__init__.py", submodule_search_locations=[str(_ROOT)])
+        if spec is None or spec.loader is None:
+            raise ImportError("could not load Design Discovery plugin entry")
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        spec.loader.exec_module(module)
+    return module
+
+
+_plugin = _load_plugin_entry()
+_state = importlib.import_module(_plugin.__name__ + ".state")
+_design_core = importlib.import_module(_plugin.__name__ + ".design_core")
+design_discovery_get_state = _plugin.design_discovery_get_state
+fonts = _design_core.fonts
+apply_patch = _state.apply_patch
+available_session_ids = _state.available_session_ids
+has_valid_state = _state.has_valid_state
 
 
 router = APIRouter()
@@ -60,8 +92,7 @@ def resolved_state(session_id: str) -> dict:
         }
     design_md = None
     if state["phase"] == "final":
-        from state import design_md_path
-        path = design_md_path(session_id)
+        path = _state.design_md_path(session_id)
         if path.is_file(): design_md = path.read_text(encoding="utf-8")
     return {
         "ok": True,

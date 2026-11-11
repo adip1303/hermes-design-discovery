@@ -1,13 +1,11 @@
 """Hermes Design Discovery plugin: revisioned design-session state."""
 from __future__ import annotations
-import colorsys, json, os, re, sys
+import colorsys, json, os, re
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
-_ROOT = str(Path(__file__).resolve().parent)
-if _ROOT not in sys.path: sys.path.insert(0, _ROOT)
-from contrast import report as contrast_report
-from design_core import ADJUSTMENT_PATHS, DIMENSIONS, VOCABULARY, archetypes, auto_correct_composed_palette, catalog, color_variety_error, detect_conflicts, enums, filter_composed_words, fonts, resolve_direction, validate_adjustments, validate_direction
-from state import append_tool_event, design_md_path, fresh_state, get_state, replace_state
+from .contrast import report as contrast_report
+from .design_core import ADJUSTMENT_PATHS, DIMENSIONS, VOCABULARY, archetypes, auto_correct_composed_palette, catalog, color_variety_error, detect_conflicts, enums, filter_composed_words, fonts, resolve_direction, validate_adjustments, validate_direction
+from .state import append_tool_event, design_md_path, fresh_state, get_state, replace_state
 TYPOGRAPHY_VARIETY_ENABLED = True
 
 GENERATE_SCHEMA = {"name":"generate_directions","description":"Validate and store exactly three directions after recorded understanding and user confirmation. Example sample: {title: Morning bake list, body: Fresh loaves ready for pickup, items: [{label: Country loaf, status: success, status_label: Ready}, {label: Cardamom bun, status: warning, status_label: Limited}], primary: Order bakes, secondary: View menu}.","parameters":{"type":"object","properties":{"directions":{"type":"array","items":{"type":"object","properties":{"voice":{"type":"object","properties":{"tone":{"type":"string","maxLength":60},"do":{"type":"array","minItems":3,"maxItems":3,"items":{"type":"string","maxLength":30}},"dont":{"type":"array","minItems":3,"maxItems":3,"items":{"type":"string","maxLength":30}},"example":{"type":"string","maxLength":100}},"required":["tone","do","dont","example"]}}}},"brief":{"type":"string"},"answers":{"type":"array"},"sample":{"type":"object","properties":{"title":{"type":"string","maxLength":40},"body":{"type":"string","maxLength":140},"items":{"type":"array","minItems":2,"maxItems":2,"items":{"type":"object","properties":{"label":{"type":"string","maxLength":28},"status":{"type":"string","enum":["success","warning","neutral"]},"status_label":{"type":"string","maxLength":18}},"required":["label","status","status_label"]}},"primary":{"type":"string","maxLength":20},"secondary":{"type":"string","maxLength":20}},"required":["title","body","items","primary","secondary"]},"confirmed_by_user":{"type":"string"}},"required":["directions","confirmed_by_user"]}}
@@ -296,7 +294,7 @@ def _user_decisions(state):
     return [{"path": path, **item, **({"from_direction_label": labels.get(item.get("from_direction"), item.get("from_direction"))} if item.get("source") == "direction" else {})} for path, item in state["adjustments"].items() if item["source"] in {"user", "described", "direction"}]
 def _normal(value): return re.sub(r"[^a-z0-9]+", "", str(value).casefold())
 def _contrast_safe_accent(value, background):
-    from contrast import contrast_ratio
+    from .contrast import contrast_ratio
     if contrast_ratio(value, background) >= 3: return value, None
     rgb = tuple(int(value[index:index + 2], 16) / 255 for index in (1, 3, 5))
     hue, lightness, saturation = colorsys.rgb_to_hls(*rgb)

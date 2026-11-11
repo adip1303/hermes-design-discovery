@@ -176,7 +176,7 @@ def _valid_loaded_state(raw: object, session_id: str) -> dict[str, Any] | None:
         return None
     try:
         state = _normalise(raw)
-        from design_core import blank_rejected, validate_direction
+        from .design_core import blank_rejected, validate_direction
         for direction in state["directions"]:
             validate_direction(direction, blank_rejected(), [], state["user_messages"])
         return state

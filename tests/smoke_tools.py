@@ -3,16 +3,28 @@
 from __future__ import annotations
 
 import json
+import importlib
+import importlib.util
 import sys
 import tempfile
 from pathlib import Path
 
 sys.dont_write_bytecode = True
 ROOT = Path(__file__).resolve().parents[1]
-sys.path.insert(0, str(ROOT))
+PLUGIN_PACKAGE = "smoke_design_discovery_plugin"
 
-import __init__ as plugin
-import state
+
+def load_plugin():
+    spec = importlib.util.spec_from_file_location(PLUGIN_PACKAGE, ROOT / "__init__.py", submodule_search_locations=[str(ROOT)])
+    assert spec is not None and spec.loader is not None
+    module = importlib.util.module_from_spec(spec)
+    sys.modules[PLUGIN_PACKAGE] = module
+    spec.loader.exec_module(module)
+    return module
+
+
+plugin = load_plugin()
+state = importlib.import_module(PLUGIN_PACKAGE + ".state")
 
 
 class RecordingContext:

@@ -10,9 +10,26 @@ from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
 
-import design_core
-import state
-from contrast import contrast_ratio, report
+ROOT = Path(__file__).resolve().parents[1]
+PLUGIN_PACKAGE = "test_design_discovery_plugin"
+
+
+def _load_plugin():
+    module = sys.modules.get(PLUGIN_PACKAGE)
+    if module is None:
+        spec = importlib.util.spec_from_file_location(PLUGIN_PACKAGE, ROOT / "__init__.py", submodule_search_locations=[str(ROOT)])
+        assert spec is not None and spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[PLUGIN_PACKAGE] = module
+        spec.loader.exec_module(module)
+    return module
+
+
+plugin = _load_plugin()
+design_core = importlib.import_module(PLUGIN_PACKAGE + ".design_core")
+state = importlib.import_module(PLUGIN_PACKAGE + ".state")
+contrast = importlib.import_module(PLUGIN_PACKAGE + ".contrast")
+contrast_ratio, report = contrast.contrast_ratio, contrast.report
 
 
 def direction(color="quiet-warmth", accent="#4E5A3A"):
@@ -103,7 +120,7 @@ def isolated_plugin():
     original = state.data_dir
     with tempfile.TemporaryDirectory(dir=Path(__file__).resolve().parents[1]) as directory:
         state.data_dir = lambda: Path(directory)
-        plugin = importlib.import_module("__init__")
+        plugin = _load_plugin()
         previous_typography_variety = plugin.TYPOGRAPHY_VARIETY_ENABLED
         plugin.TYPOGRAPHY_VARIETY_ENABLED = False
         plugin._RECENT_USER_MESSAGES.clear()
@@ -130,7 +147,15 @@ def dashboard_api():
             def __init__(self, **kwargs): self.kwargs = kwargs
         fastapi.APIRouter, fastapi.HTTPException, fastapi.Request = Router, HttpError, object
         sys.modules["fastapi"] = fastapi
-    return importlib.import_module("dashboard.plugin_api")
+    name = "test_design_discovery_dashboard_api"
+    module = sys.modules.get(name)
+    if module is None:
+        spec = importlib.util.spec_from_file_location(name, ROOT / "dashboard" / "plugin_api.py")
+        assert spec is not None and spec.loader is not None
+        module = importlib.util.module_from_spec(spec)
+        sys.modules[name] = module
+        spec.loader.exec_module(module)
+    return module
 
 
 def test_direction_resolves_full_tokens():
@@ -306,7 +331,7 @@ def test_composed_adjustment_rederives_usage_and_pane_and_export_mark_composed()
         plugin.pre_llm_call(session_id="one", user_message="Make the button orange like a tangerine")
         adjusted = update_success(plugin, {"action": "adjust", "path": "color.accent", "value": "#D4783C", "source": "described", "user_words": "orange like a tangerine"})
         assert adjusted["state"]["adjustments"]["color.accent"]["source"] == "described"
-        api = importlib.import_module("dashboard.plugin_api")
+        api = dashboard_api()
         pane = api.resolved_state("one")
         assert pane["resolved_working"]["tokens"]["accent_usage"] in {"text_and_fill", "fill_only"}
         assert next(item for item in pane["resolved_working"]["dimensions"] if item["dimension"] == "color")["label"] == "Clay Morning"
@@ -644,7 +669,7 @@ def test_generation_leniently_drops_bad_sample_voice_and_words_with_warnings():
 
 
 def test_generate_schema_exposes_lenient_sample_and_voice_shapes_without_hard_limits():
-    schema = __import__("__init__").GENERATE_SCHEMA
+    schema = plugin.GENERATE_SCHEMA
     sample = schema["parameters"]["properties"]["sample"]
     assert set(sample["properties"]) == {"title", "body", "items", "primary", "secondary"}
     assert set(sample["properties"]["items"]["items"]["properties"]) == {"label", "status", "status_label"}
@@ -759,7 +784,7 @@ def test_dashboard_route_returns_requested_session_or_empty_state():
             fastapi.HTTPException = HttpError
             fastapi.Request = object
             sys.modules["fastapi"] = fastapi
-        api = importlib.import_module("dashboard.plugin_api")
+        api = dashboard_api()
         def read(session_id):
             coroutine = api.read_state(SimpleNamespace(query_params={"session_id": session_id}))
             try:
@@ -1051,7 +1076,7 @@ def test_route_returns_working_mix_and_lock_after_try_needs_confirmation():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()])
         update_success(plugin, {"action": "try", "directions": {"typography": "one"}})
-        api = importlib.import_module("dashboard.plugin_api")
+        api = dashboard_api()
         working = api.resolved_state("one")["resolved_working"]
         assert working["dimensions"] and all(entry["status"] == "open" for entry in working["dimensions"])
         assert not any(entry["status"] == "locked" for entry in working["dimensions"])
@@ -1319,7 +1344,7 @@ def test_described_accent_uses_recorded_user_words_and_pane_provenance():
         assert adjusted["ok"] is True
         assert adjusted["next"]
         assert adjusted["state"]["adjustments"]["color.accent"] == {"value": "#2F4656", "source": "described", "user_words": "bright orange like a tangerine"}, adjusted
-        api = importlib.import_module("dashboard.plugin_api")
+        api = dashboard_api()
         accent = api.resolved_state("one")["resolved_working"]["dimensions"][-1]
         assert accent == {"dimension": "accent", "label": "bright orange like a tangerine", "status": "open", "described": True, "contrast_adjusted": None}
 
@@ -1370,7 +1395,7 @@ def test_adjust_before_try_fills_working_state_and_persists_accent_in_pane():
             class HttpError(Exception): pass
             fastapi.APIRouter, fastapi.HTTPException, fastapi.Request = Router, HttpError, object
             sys.modules["fastapi"] = fastapi
-        api = importlib.import_module("dashboard.plugin_api")
+        api = dashboard_api()
         working = api.resolved_state("one")["resolved_working"]
         assert working["tokens"]["color"]["accent"] == "#4E5A3A"
         assert working["tokens"]["color"]["accent_text"] != ""
@@ -1466,7 +1491,7 @@ def test_generate_assigns_stable_direction_ids_and_accepts_labels_for_selection(
             confirm(plugin, "lock warm signal")
             locked = json.loads(plugin.update_choice({"action": "lock", "dimension": "color", "direction_id": "Warm Signal", "confirmed_by_user": "lock warm signal"}, session_id="one"))
             assert locked["state"]["working"]["color"]["direction_id"] == "dir-b"
-            api = importlib.import_module("dashboard.plugin_api")
+            api = dashboard_api()
             assert len(api.resolved_state("one")["resolved_directions"]) == 3
 
 
@@ -1608,7 +1633,7 @@ def test_color_value_refusals_are_specific_and_unknown_sources_are_lenient():
 
 
 def test_design_md_brief_uses_skill_command_remainder_or_next_user_message():
-    plugin = importlib.import_module("__init__")
+    plugin = _load_plugin()
     state_value = state.fresh_state(); state_value["brief"] = "summary fallback"
     state_value["user_messages"] = ['[IMPORTANT: The user has invoked the "design-discovery" skill]\nThe user has provided the following instruction alongside the skill invocation: A garden planner for mornings.']
     assert plugin._brief_from_user_messages(state_value) == "A garden planner for mornings."
@@ -1736,8 +1761,8 @@ def test_design_md_leak_guard_and_resolved_values_for_archetypes_composed_and_mi
         for dimension in design_core.DIMENSIONS: state_value["working"][dimension] = {"source": item["sources"][dimension], "status": "locked", "direction_id": "safe"}
         if item["sources"]["color"].startswith("composed:"): state_value["working"]["color"]["palette"] = dict(item["composed_palette"])
         state_value["adjustments"] = dict(item["adjustments"]); state_value["user_messages"] = ["bright orange"]
-        tokens = design_core.resolve_direction(plugin_direction := importlib.import_module("__init__")._working_direction(state_value), user_messages=state_value["user_messages"])
-        document = importlib.import_module("__init__")._render_design_md(state_value, tokens)
+        tokens = design_core.resolve_direction(plugin_direction := plugin._working_direction(state_value), user_messages=state_value["user_messages"])
+        document = plugin._render_design_md(state_value, tokens)
         assert len(document.splitlines()) < 300
         assert all("--text-" + name + ":" in document for name in ("caption", "body", "h4", "h3", "h2", "h1", "display"))
         assert all("--space-" + str(index) + ":" in document for index in range(1, 9))
@@ -1746,7 +1771,7 @@ def test_design_md_leak_guard_and_resolved_values_for_archetypes_composed_and_mi
         assert document.count("```") % 2 == 0
         leaked = [value for value in forbidden if (re.search(r"\\b" + re.escape(value) + r"\\b", document, re.I) if value.isalnum() else value in document)]
         assert not leaked, leaked
-        values = importlib.import_module("__init__")._token_values(); density = values["densities"][tokens["layout"]["density"]]; motion = values["motion_presets"][tokens["motion"]["preset"]]
+        values = plugin._token_values(); density = values["densities"][tokens["layout"]["density"]]; motion = values["motion_presets"][tokens["motion"]["preset"]]
         assert str(density["unit_px"]) + "px" in document and str(motion["micro_ms"]) + "ms" in document
 
 
@@ -1772,7 +1797,7 @@ def test_final_pane_payload_carries_exported_content():
     with isolated_plugin() as plugin:
         generate(plugin, [direction()]); lock_all(plugin); confirm(plugin, "export it")
         exported = json.loads(plugin.export_design_md({"confirmed_by_user": "export it"}, session_id="one"))
-        api = importlib.import_module("dashboard.plugin_api")
+        api = dashboard_api()
         payload = api.resolved_state("one")
         assert payload["phase"] == "final" and payload["design_md"] == exported["design_md"]
 
@@ -1974,7 +1999,7 @@ def test_export_refuses_untyped_folder():
 def test_inverted_google_font_url_requests_300():
     tokens = design_core.resolve_direction(direction())
     tokens["typography"]["weight_contrast"] = "inverted"
-    assert "Cormorant" not in __import__("__init__")._google_font_url(tokens) or "wght@300" in __import__("__init__")._google_font_url(tokens)
+    assert "Cormorant" not in plugin._google_font_url(tokens) or "wght@300" in plugin._google_font_url(tokens)
 
 
 def test_font_classes_validate_catalog_and_urls_cover_the_full_library():
@@ -1987,7 +2012,7 @@ def test_font_classes_validate_catalog_and_urls_cover_the_full_library():
     with isolated_plugin() as plugin:
         catalog_fonts = json.loads(plugin.design_discovery_get_state({}, session_id="one"))["catalog"]["fonts"]
         assert all({"class", "roles", "weights"} <= set(font) for font in catalog_fonts)
-    module = __import__("__init__")
+    module = plugin
     for font in raw_fonts:
         tokens = design_core.resolve_direction(direction())
         tokens["typography"].update({"display_font": font["id"], "body_font": font["id"], "ui_font": font["id"]})
@@ -2195,7 +2220,7 @@ def test_accent_text_uses_black_when_white_does_not_pass_and_export_has_no_failu
 
 
 def test_brief_extraction_uses_only_the_instruction_after_the_skill_wrapper():
-    plugin = importlib.import_module("__init__")
+    plugin = _load_plugin()
     wrapper = '[IMPORTANT: skill]\n[Bundle context: full skill]\n# Design discovery\n[Skill directory: C:\\skill]\nThe user has provided the following instruction alongside the skill invocation: A calm bakery dashboard.'
     assert plugin._brief_from_user_messages({"user_messages": [wrapper], "brief": "fallback"}) == "A calm bakery dashboard."
     assert all(value not in plugin._brief_from_user_messages({"user_messages": [wrapper], "brief": "fallback"}) for value in ("IMPORTANT:", "[Skill directory", "Bundle context", "# Design discovery"))

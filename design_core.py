@@ -6,7 +6,7 @@ import json
 from copy import deepcopy
 from pathlib import Path
 from typing import Any
-from contrast import contrast_ratio, report as contrast_report
+from .contrast import contrast_ratio, report as contrast_report
 
 ROOT = Path(__file__).resolve().parent
 DATA = ROOT / "data"
